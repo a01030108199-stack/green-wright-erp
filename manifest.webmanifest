@@ -1,0 +1,26 @@
+{
+  "name": "جرين رايت للاستثمار الزراعي - المنظومة المحاسبية",
+  "short_name": "جرين رايت ERP",
+  "description": "المنظومة المحاسبية والإدارية المتكاملة لشركة جرين رايت للاستثمار الزراعي",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1528",
+  "theme_color": "#0b1528",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "green-wright-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "green-wright-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>جرين رايت للاستثمار الزراعي - المنظومة المحاسبية</title>
+    <!-- PWA & Mobile Web App Support -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0b1528">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="جرين رايت ERP">
+  <link rel="apple-touch-icon" href="green-wright-logo.png">
   <!-- Google Fonts: Cairo -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -8220,6 +8227,10 @@ window.FULL_ERP_DATABASE = {
             <span>ميزان المراجعة</span>
             <span id="countTrialBadge" class="bg-blue-950/80 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">115</span>
           </button>
+          <button onclick="switchTab('analytics')" id="tab-analytics" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30">
+            <span>📊</span>
+            <span>مؤشرات الأداء</span>
+          </button>
 
           <button onclick="switchTab('admin')" id="tab-admin" class="hidden px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-purple-400 hover:text-white hover:bg-purple-900/30 border border-purple-500/20">
             <span>⚙️</span>
@@ -8740,7 +8751,10 @@ window.FULL_ERP_DATABASE = {
           <div class="w-full sm:w-72">
             <input type="text" id="searchInvoicesInput" placeholder="بحث برقم الفاتورة أو التاريخ..." oninput="filterInvoices()"
                    class="w-full bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
-          </div>
+          
+            <button onclick="exportTableToExcel('invoicesTableBody', 'فواتير_المبيعات_جرين_رايت')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button></div>
         </div>
         <div class="overflow-x-auto max-h-[620px] overflow-y-auto rounded-xl border border-blue-900/40">
           <table class="w-full text-right text-xs">
@@ -8769,7 +8783,11 @@ window.FULL_ERP_DATABASE = {
             <h2 class="font-bold text-white text-base">دليل العملاء والأرصدة الختامية</h2>
             <p class="text-xs text-slate-400">إجمالي المبيعات، المقبوضات، كشف الحساب التفصيلي، والتحصيل السريع</p>
           </div>
-          <div class="w-full sm:w-72">
+          <div class="flex items-center gap-2">
+            <button onclick="exportTableToExcel('clientsTableBody', 'دليل_العملاء_جرين_رايت')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button>
+            <div class="w-full sm:w-72">
             <input type="text" id="searchClientsInput" placeholder="بحث باسم العميل أو الكود..." oninput="filterClients()"
                    class="w-full bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
           </div>
@@ -8864,7 +8882,10 @@ window.FULL_ERP_DATABASE = {
           <div class="flex flex-wrap items-center gap-2">
             <input type="text" id="searchAccountsInput" placeholder="بحث برقم الحساب أو الاسم أو التصنيف..." oninput="filterAccounts()"
                    class="w-full sm:w-80 bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
-          </div>
+          
+            <button onclick="exportTableToExcel('accountsTableBody', 'دليل_الحسابات_العامة')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button></div>
         </div>
 
         <!-- Filter Category Chips -->
@@ -8911,7 +8932,10 @@ window.FULL_ERP_DATABASE = {
           <div class="flex flex-wrap items-center gap-2">
             <input type="text" id="searchEntriesInput" placeholder="بحث برقم القيد أو البيان أو الموظف..." oninput="filterEntries()"
                    class="w-full sm:w-80 bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
-          </div>
+          
+            <button onclick="exportTableToExcel('entriesTableBody', 'قيود_اليومية_العامة')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button></div>
         </div>
 
         <!-- Filter Entry Type Chips -->
@@ -8961,7 +8985,10 @@ window.FULL_ERP_DATABASE = {
           <div class="flex flex-wrap items-center gap-2">
             <input type="text" id="searchPurchasesInput" placeholder="بحث برقم الفاتورة أو التاريخ أو الملاحظات..." oninput="filterPurchases()"
                    class="w-full sm:w-80 bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
-          </div>
+          
+            <button onclick="exportTableToExcel('purchasesTableBody', 'فواتير_المشتريات')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button></div>
         </div>
 
         <div class="overflow-x-auto max-h-[620px] overflow-y-auto rounded-xl border border-blue-900/40">
@@ -9001,7 +9028,10 @@ window.FULL_ERP_DATABASE = {
           <div class="flex flex-wrap items-center gap-2">
             <input type="text" id="searchTrialInput" placeholder="بحث برقم أو اسم الحساب..." oninput="filterTrialBalance()"
                    class="w-full sm:w-80 bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
-          </div>
+          
+            <button onclick="exportTableToExcel('trialTableBody', 'ميزان_المراجعة_المالي')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <span>📥</span><span>تصدير Excel</span>
+            </button></div>
         </div>
 
         <div class="overflow-x-auto max-h-[620px] overflow-y-auto rounded-xl border border-blue-900/40">
@@ -9024,6 +9054,134 @@ window.FULL_ERP_DATABASE = {
         </div>
       </div>
     </div>
+    <!-- ==================== TAB: (لوحة مؤشرات الأداء والتحليلات البيانية) ==================== -->
+    <div id="section-analytics" class="hidden space-y-6">
+      <!-- Welcome Header -->
+      <div class="bg-gradient-to-r from-[#0f1d36] via-[#132544] to-[#0f1d36] rounded-2xl border border-blue-900/40 p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📊</span>
+            <h2 class="text-lg font-black text-white">لوحة تحكم مؤشرات الأداء التنفيذية</h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/40 text-[10px] font-bold">مباشر 🟢</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">تحليل فوري للمبيعات، السيولة المحصلة، المديونيات، والأصناف الأكثر طلباً</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="renderAnalyticsDashboard()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition">
+            <span>🔄</span><span>تحديث المؤشرات</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top 4 KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Sales Total -->
+        <div class="bg-[#0f1d36] p-5 rounded-2xl border border-blue-900/40 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-bold">إجمالي المبيعات</span>
+            <span class="p-2 bg-blue-950 text-blue-400 rounded-xl text-sm">🧾</span>
+          </div>
+          <div id="kpiTotalSales" class="text-2xl font-black text-white mt-2 font-mono">0 ج.م</div>
+          <div class="text-[11px] text-emerald-400 mt-1 font-semibold flex items-center gap-1">
+            <span>📈</span><span id="kpiInvoicesCount">0 فاتورة مسجلة</span>
+          </div>
+        </div>
+
+        <!-- Cash Collected -->
+        <div class="bg-[#0f1d36] p-5 rounded-2xl border border-blue-900/40 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-bold">السيولة النقدية المحصلة</span>
+            <span class="p-2 bg-emerald-950 text-emerald-400 rounded-xl text-sm">💵</span>
+          </div>
+          <div id="kpiTotalReceipts" class="text-2xl font-black text-emerald-400 mt-2 font-mono">0 ج.م</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-semibold flex items-center gap-1">
+            <span>💳</span><span id="kpiReceiptsCount">0 سند قبض</span>
+          </div>
+        </div>
+
+        <!-- Market Debt -->
+        <div class="bg-[#0f1d36] p-5 rounded-2xl border border-blue-900/40 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-bold">إجمالي المديونيات بالسوق</span>
+            <span class="p-2 bg-amber-950 text-amber-400 rounded-xl text-sm">⏳</span>
+          </div>
+          <div id="kpiTotalDebts" class="text-2xl font-black text-amber-400 mt-2 font-mono">0 ج.م</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-semibold flex items-center gap-1">
+            <span>👥</span><span id="kpiDebtorsCount">0 عميل مدين</span>
+          </div>
+        </div>
+
+        <!-- Collection Rate -->
+        <div class="bg-[#0f1d36] p-5 rounded-2xl border border-blue-900/40 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-bold">كفاءة ونسبة التحصيل</span>
+            <span class="p-2 bg-purple-950 text-purple-400 rounded-xl text-sm">🎯</span>
+          </div>
+          <div id="kpiCollectionRate" class="text-2xl font-black text-purple-400 mt-2 font-mono">0%</div>
+          <div class="w-full bg-[#0b1528] h-2 rounded-full mt-2 overflow-hidden border border-blue-900/30">
+            <div id="kpiProgressBar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts & Top Lists Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Clients by Balance / Sales -->
+        <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-900/40">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🏆</span><span>كبار العملاء الأكثر نشاطاً</span>
+            </h3>
+            <span class="text-[11px] text-slate-400">حسب إجمالي السحب</span>
+          </div>
+          <div id="topClientsList" class="space-y-3">
+            <!-- Dynamic -->
+          </div>
+        </div>
+
+        <!-- Top Selling Items -->
+        <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-900/40">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🌾</span><span>المنتجات الزراعية والأصناف الرئيسية</span>
+            </h3>
+            <span class="text-[11px] text-slate-400">الكتالوج المتاح</span>
+          </div>
+          <div id="topItemsList" class="space-y-3">
+            <!-- Dynamic -->
+          </div>
+        </div>
+
+        <!-- Top Critical Debts (Aging) -->
+        <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl lg:col-span-2">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-900/40">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>⚠️</span><span>أعلى المديونيات المطلوب متابعتها وتحصيلها</span>
+            </h3>
+            <span class="text-[11px] text-rose-400 font-semibold">أولويات التحصيل للمناديب</span>
+          </div>
+          <div class="overflow-x-auto rounded-xl border border-blue-900/40">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-[#060d1a] text-blue-200 font-bold border-b border-blue-900/50">
+                <tr>
+                  <th class="py-2.5 px-4">العميل</th>
+                  <th class="py-2.5 px-4">رقم الحساب</th>
+                  <th class="py-2.5 px-4">إجمالي السحب</th>
+                  <th class="py-2.5 px-4">المسدد</th>
+                  <th class="py-2.5 px-4">المتبقي المطلوب تحصيله</th>
+                  <th class="py-2.5 px-4">الحالة</th>
+                  <th class="py-2.5 px-4 text-center">إجراء فوري</th>
+                </tr>
+              </thead>
+              <tbody id="topDebtsBody" class="divide-y divide-blue-900/20">
+                <!-- Dynamic -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
 
 
@@ -9484,6 +9642,9 @@ window.FULL_ERP_DATABASE = {
           <button onclick="window.print()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
             <span>🖨️ طباعة الفاتورة</span>
           </button>
+          <button onclick="shareActiveInvoiceWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition">
+            <span>📲</span><span>إرسال عبر واتساب</span>
+          </button>
           <button onclick="closePrintInvoiceModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs">
             إغلاق
           </button>
@@ -9593,6 +9754,9 @@ window.FULL_ERP_DATABASE = {
         <div class="flex items-center gap-2">
           <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-md">
             <span>🖨️ طباعة الكشف</span>
+          </button>
+          <button onclick="shareActiveStatementWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1 shadow-md transition">
+            <span>📲</span><span>إرسال عبر واتساب</span>
           </button>
           <button onclick="closeClientStatementModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs">
             إغلاق
@@ -9723,6 +9887,9 @@ window.FULL_ERP_DATABASE = {
         <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center gap-1.5 text-xs">
           <span>🖨️</span>
           <span>طباعة فورية</span>
+        </button>
+        <button onclick="shareActiveReceiptWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition">
+          <span>📲</span><span>إرسال عبر واتساب</span>
         </button>
         <button onclick="closePrintModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl transition text-xs">
           إغلاق
@@ -10054,7 +10221,7 @@ window.FULL_ERP_DATABASE = {
           return;
         }
       }
-      const tabs = ['new-invoice', 'receipts', 'payments', 'invoices', 'clients', 'suppliers', 'items', 'accounts', 'entries', 'purchases', 'trial', 'admin'];
+      const tabs = ['new-invoice', 'receipts', 'payments', 'invoices', 'clients', 'suppliers', 'items', 'accounts', 'entries', 'purchases', 'trial', 'analytics', 'admin'];
       tabs.forEach(t => {
         const sec = document.getElementById('section-' + t);
         if (sec) sec.classList.add('hidden');
@@ -10099,6 +10266,7 @@ window.FULL_ERP_DATABASE = {
         else if (tab === 'entries') renderEntriesTable(db.dailyEntries || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.dailyEntries));
         else if (tab === 'purchases') renderPurchasesTable(db.purchaseInvoices || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.purchaseInvoices));
         else if (tab === 'trial') renderTrialBalanceTable(db.trialBalance || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.trialBalance));
+        else if (tab === 'analytics') renderAnalyticsDashboard();
         else if (tab === 'invoices') renderInvoicesTable(db.salesInvoices);
         else if (tab === 'payments') renderPaymentsTable();
         else if (tab === 'receipts') renderReceiptsHistory();
@@ -12793,6 +12961,228 @@ window.FULL_ERP_DATABASE = {
         balances: adj,
         updatedAt: new Date().toISOString()
       }), { merge: true }).catch(e => console.error("Cloud sync treasuries error:", e));
+    }
+
+  
+
+    // ==================== ADVANCED BUSINESS FEATURES ====================
+    let activeModalInvoice = null;
+    let activeModalReceipt = null;
+    let activeModalStatementClientId = null;
+
+    // 1. WhatsApp Share Handlers
+    function shareInvoiceViaWhatsApp(inv) {
+      if (!inv) return;
+      let itemsText = (inv.items || []).map(it => `- ${it.name} (${it.qty} ${it.unit || ''}) = ${(Number(it.total) || 0).toLocaleString()} ج.م`).join('\n');
+      if (!itemsText) itemsText = `- إجمالي قيمة الفاتورة: ${(Number(inv.netAmount || inv.amount) || 0).toLocaleString()} ج.م`;
+
+      const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n📄 *فاتورة مبيعات رقم:* #${inv.invoiceNo}\n📅 *التاريخ:* ${(inv.date || '').slice(0, 10)}\n👤 *العميل المحترم:* ${inv.clientName || 'عميل'}\n----------------------------------\n📦 *تفاصيل الفاتورة:*\n${itemsText}\n----------------------------------\n💰 *إجمالي الفاتورة:* ${(Number(inv.netAmount || inv.amount) || 0).toLocaleString()} ج.م\n💵 *المدفوع نقداً:* ${(Number(inv.paidCash) || 0).toLocaleString()} ج.م\n📌 *المتبقي من الفاتورة:* ${(Number(inv.finalRemaining) || 0).toLocaleString()} ج.م\n👤 *المندوب المسؤول:* ${inv.rep || inv.user || 'جرين رايت'}\n\n🤝 *شكراً لتعاملكم الراقي معنا، مع تمنياتنا بموسم زراعي مبارك ومثمر.*`;
+
+      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function shareActiveInvoiceWhatsApp() {
+      if (activeModalInvoice) shareInvoiceViaWhatsApp(activeModalInvoice);
+    }
+
+    function shareReceiptViaWhatsApp(r) {
+      if (!r) return;
+      const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n🧾 *سند قبض نقدي رقم:* #${r.receiptNo}\n📅 *التاريخ:* ${(r.date || '').slice(0, 10)}\n👤 *استلمنا من السيد:* ${r.clientName}\n💰 *مبلغ وقدره:* ${(Number(r.amount) || 0).toLocaleString()} ج.م\n📝 *البيان:* ${r.detail || 'دفعة واصلة تحت الحساب'}\n🏦 *الخزينة المستلمة:* ${r.treasuryName}\n\n🤝 *تم قيد المبلغ في حسابكم بنجاح، شكراً لتعاملكم الدائم.*`;
+
+      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function shareActiveReceiptWhatsApp() {
+      if (activeModalReceipt) shareReceiptViaWhatsApp(activeModalReceipt);
+    }
+
+    function shareStatementViaWhatsApp(clientId) {
+      const client = (db.clients || []).find(c => String(c.id) === String(clientId));
+      if (!client) return;
+
+      const openBal = Number(client.openBalance || 0);
+      const totalSales = Number(client.totalSales || 0);
+      const totalReceipts = Number(client.totalReceipts || 0);
+      const bal = Number(client.balance != null ? client.balance : (openBal + totalSales - totalReceipts));
+
+      const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n📊 *كشف حساب العميل المحترم:* ${client.name}\n🔢 *كود الحساب:* #${client.id}\n📅 *تاريخ التقرير:* ${new Date().toLocaleDateString('ar-EG')}\n----------------------------------\n📌 *رصيد أول المدة:* ${openBal.toLocaleString()} ج.م\n🛒 *إجمالي المسحوبات (المبيعات):* ${totalSales.toLocaleString()} ج.م\n💳 *إجمالي المدفوعات (التحصيلات):* ${totalReceipts.toLocaleString()} ج.م\n----------------------------------\n⚖️ *صافي الرصيد الحالي:* ${bal.toLocaleString()} ج.م (${bal > 0 ? 'متبقي عليكم' : 'رصيد دائن'})\n\n🤝 *شاكرين تعاونكم الدائم معنا.*`;
+
+      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function shareActiveStatementWhatsApp() {
+      if (activeModalStatementClientId) shareStatementViaWhatsApp(activeModalStatementClientId);
+    }
+
+    // 2. Universal Excel Export
+    function exportTableToExcel(tableBodyId, filename = 'تقرير_جرين_رايت') {
+      const tbody = document.getElementById(tableBodyId);
+      if (!tbody) {
+        alert("لا توجد بيانات متاحة للتصدير!");
+        return;
+      }
+
+      const table = tbody.closest('table');
+      if (!table) return;
+
+      let csv = [];
+      const rows = table.querySelectorAll('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = [];
+        const cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+          if (cols[j].textContent.includes('إجراءات') || cols[j].querySelector('button')) continue;
+          let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s+)/gm, ' ');
+          data = data.replace(/"/g, '""');
+          row.push('"' + data + '"');
+        }
+        if (row.length > 0) csv.push(row.join(','));
+      }
+
+      const csvString = '\uFEFF' + csv.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 3. Executive Dashboard & KPI Calculator
+    function renderAnalyticsDashboard() {
+      const clients = db.clients || [];
+      const invoices = db.salesInvoices || [];
+      const receipts = db.cashReceipts || [];
+      const items = db.items || [];
+
+      // Calculate totals
+      const totalSales = invoices.reduce((sum, inv) => sum + Number(inv.netAmount || inv.amount || 0), 0);
+      const totalReceipts = receipts.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      const totalDebts = clients.reduce((sum, c) => {
+        const bal = Number(c.balance != null ? c.balance : (Number(c.openBalance || 0) + Number(c.totalSales || 0) - Number(c.totalReceipts || 0)));
+        return sum + (bal > 0 ? bal : 0);
+      }, 0);
+
+      const debtorsCount = clients.filter(c => Number(c.balance || 0) > 0).length;
+      const collectionRate = (totalSales + totalReceipts) > 0 ? Math.min(100, Math.round((totalReceipts / (totalSales || 1)) * 100)) : 0;
+
+      // Update KPIs
+      if (document.getElementById('kpiTotalSales')) document.getElementById('kpiTotalSales').textContent = totalSales.toLocaleString() + ' ج.م';
+      if (document.getElementById('kpiInvoicesCount')) document.getElementById('kpiInvoicesCount').textContent = invoices.length + ' فاتورة مسجلة';
+      if (document.getElementById('kpiTotalReceipts')) document.getElementById('kpiTotalReceipts').textContent = totalReceipts.toLocaleString() + ' ج.م';
+      if (document.getElementById('kpiReceiptsCount')) document.getElementById('kpiReceiptsCount').textContent = receipts.length + ' سند قبض';
+      if (document.getElementById('kpiTotalDebts')) document.getElementById('kpiTotalDebts').textContent = totalDebts.toLocaleString() + ' ج.م';
+      if (document.getElementById('kpiDebtorsCount')) document.getElementById('kpiDebtorsCount').textContent = debtorsCount + ' عميل عليهم مديونيات';
+      if (document.getElementById('kpiCollectionRate')) document.getElementById('kpiCollectionRate').textContent = collectionRate + '%';
+      if (document.getElementById('kpiProgressBar')) document.getElementById('kpiProgressBar').style.width = collectionRate + '%';
+
+      // Top Clients by Sales
+      const topClients = [...clients].sort((a, b) => Number(b.totalSales || 0) - Number(a.totalSales || 0)).slice(0, 5);
+      const topClientsContainer = document.getElementById('topClientsList');
+      if (topClientsContainer) {
+        topClientsContainer.innerHTML = topClients.map((c, i) => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-[#0b1528] border border-blue-900/30">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-amber-500 text-slate-900' : 'bg-slate-800 text-slate-300'}">${i+1}</span>
+              <div>
+                <div class="font-bold text-white text-xs">${c.name}</div>
+                <div class="text-[10px] text-slate-400 font-mono">كود #${c.id}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-emerald-400 font-mono text-xs">${Number(c.totalSales || 0).toLocaleString()} ج.م</div>
+              <div class="text-[10px] text-slate-400">سحوبات</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Top Items Catalog
+      const topItemsContainer = document.getElementById('topItemsList');
+      if (topItemsContainer) {
+        topItemsContainer.innerHTML = items.slice(0, 5).map((it, i) => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-[#0b1528] border border-blue-900/30">
+            <div class="flex items-center gap-3">
+              <span class="text-xs">🌾</span>
+              <div>
+                <div class="font-bold text-white text-xs">${it.name}</div>
+                <div class="text-[10px] text-slate-400 font-mono">${it.group || 'عام'}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800/40 text-[10px] font-bold">كود #${it.code || it.id}</span>
+          </div>
+        `).join('');
+      }
+
+      // Top Critical Debts
+      const criticalDebtors = [...clients]
+        .map(c => ({
+          ...c,
+          safeBal: Number(c.balance != null ? c.balance : (Number(c.openBalance || 0) + Number(c.totalSales || 0) - Number(c.totalReceipts || 0)))
+        }))
+        .filter(c => c.safeBal > 0)
+        .sort((a, b) => b.safeBal - a.safeBal)
+        .slice(0, 6);
+
+      const topDebtsBody = document.getElementById('topDebtsBody');
+      if (topDebtsBody) {
+        topDebtsBody.innerHTML = criticalDebtors.map((c, idx) => `
+          <tr class="${idx % 2 === 1 ? 'bg-[#0d182e]' : 'bg-[#0f1d36]'} hover:bg-blue-900/30 transition">
+            <td class="py-2.5 px-4 font-bold text-white text-xs">${c.name}</td>
+            <td class="py-2.5 px-4 text-slate-400 font-mono text-[11px]">${c.id}</td>
+            <td class="py-2.5 px-4 font-mono text-slate-300 text-xs">${Number(c.totalSales || 0).toLocaleString()} ج.م</td>
+            <td class="py-2.5 px-4 font-mono text-slate-300 text-xs">${Number(c.totalReceipts || 0).toLocaleString()} ج.م</td>
+            <td class="py-2.5 px-4 font-bold font-mono text-xs text-rose-400">${c.safeBal.toLocaleString()} ج.م</td>
+            <td class="py-2.5 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800/40">مطلوب تحصيله ⚠️</span>
+            </td>
+            <td class="py-2.5 px-4 text-center">
+              <button onclick="shareStatementViaWhatsApp('${c.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white border border-emerald-500/40 font-bold text-[11px] transition shadow-xs flex items-center gap-1 mx-auto">
+                <span>📲</span><span>تنبيه واتساب</span>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // Hook modal active items
+    const _origShowPrintInvoice = showPrintInvoiceModal;
+    showPrintInvoiceModal = function(inv) {
+      activeModalInvoice = inv;
+      _origShowPrintInvoice(inv);
+    };
+
+    const _origShowPrintModal = showPrintModal;
+    showPrintModal = function(r) {
+      activeModalReceipt = r;
+      _origShowPrintModal(r);
+    };
+
+    const _origOpenClientStatement = openClientStatementModal;
+    openClientStatementModal = function(clientId) {
+      activeModalStatementClientId = clientId;
+      _origOpenClientStatement(clientId);
+    };
+
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
     }
 
   </script>
