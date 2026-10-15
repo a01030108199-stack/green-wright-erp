@@ -13819,8 +13819,8 @@ window.FULL_ERP_DATABASE = {
                 <span>🔍</span><span>كشف الحساب</span>
               </button>
               <button onclick="shareCostCenterDirectWhatsApp('${c.name}', '${c.id}', '${c.supervisor || ''}')" 
-                      class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer" title="إرسال تقرير القطاع واتساب">
-                <span>📲</span>
+                      class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer" title="إرسال كشف الحساب والعمليات واتساب">
+                <span>📲</span><span>واتساب</span>
               </button>
             </div>
           </td>
@@ -14008,26 +14008,102 @@ window.FULL_ERP_DATABASE = {
     // ==================== COST CENTERS WHATSAPP EXPORT LOGIC ====================
     let activeModalCostCenter = null;
 
-    function shareCostCenterDirectWhatsApp(centerName, centerId, supervisor) {
+    function formatCostCenterStatementWhatsAppText(centerName, centerId, supervisor) {
       const fin = getCostCenterFinancials(centerName);
       const isProfit = fin.netProfit >= 0;
       const profitSign = fin.netProfit > 0 ? '+' : '';
       const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
+      // Gather all transactions & filter out any item with amount === 0
+      let rows = [];
+      (fin.salesList || []).forEach(inv => {
+        const amt = parseFloat(inv.netAmount || inv.amount) || 0;
+        if (amt > 0) {
+          rows.push({
+            type: 'فاتورة مبيعات',
+            no: `فاتورة #${inv.invoiceNo}`,
+            date: (inv.date || '').replace('T', ' '),
+            party: inv.clientName || 'عميل نقدي',
+            amount: amt,
+            isCredit: true
+          });
+        }
+      });
+
+      (fin.paymentsList || []).forEach(p => {
+        const amt = parseFloat(p.amount) || 0;
+        if (amt > 0) {
+          rows.push({
+            type: 'سند صرف',
+            no: `سند #${p.paymentNo}`,
+            date: (p.date || '').replace('T', ' '),
+            party: p.payeeName || p.detail || 'مصروف عام',
+            amount: amt,
+            isCredit: false
+          });
+        }
+      });
+
+      (fin.purchasesList || []).forEach(pur => {
+        const amt = parseFloat(pur.amount) || 0;
+        if (amt > 0) {
+          rows.push({
+            type: 'فاتورة مشتريات',
+            no: `مشتريات #${pur.invoiceNo || pur.entryId}`,
+            date: (pur.date || '').replace('T', ' '),
+            party: pur.supplierName || pur.detail || 'مشتريات بضاعة',
+            amount: amt,
+            isCredit: false
+          });
+        }
+      });
+
+      // Sort newest first
+      rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
       let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
-      text += `🎯 *تقرير أرباح وتكاليف قطاع / مركز:*\n`;
-      text += `📍 *الاسم:* ${centerName} (كود: #${centerId})\n`;
+      text += `📋 *كشف حساب تحليلي رسمي - قطاع / مركز:*\n`;
+      text += `🎯 *الاسم:* ${centerName} (كود: #${centerId})\n`;
       text += `👤 *المشرف المسؤول:* ${supervisor || 'الإدارة العامة'}\n`;
       text += `📅 *تاريخ التقرير:* ${today}\n`;
-      text += `--------------------------------\n`;
-      text += `📈 *إجمالي المبيعات المحققة:* ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
-      text += `📉 *إجمالي التكاليف والمصروفات:* ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
-      text += `💰 *صافي أرباح / فائض القطاع:* ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? '✅' : '⚠️'}\n`;
-      text += `--------------------------------\n`;
-      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
-      text += `👨‍💻 برمجة وتصميم / أكرم سعد - 01030108199`;
+      text += `════════════════════════════════\n`;
+      text += `📊 *الموقف المالي الإجمالي:*\n`;
+      text += `📈 *إجمالي المبيعات:* ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
+      text += `📉 *إجمالي المصروفات والتكاليف:* ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
+      text += `💰 *صافي أرباح / فائض المركز:* ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? '✅' : '⚠️'}\n`;
+      text += `════════════════════════════════\n`;
 
-      openWhatsAppModal(`تقرير مركز: ${centerName}`, `إرسال تقرير الأرباح والتكاليف للمشرف أو المدير`, text);
+      if (rows.length === 0) {
+        text += `⚠️ *ملاحظة:* لا توجد أي حركات أو مبالغ مسجلة لهذا المركز (رصيد صفري).\n`;
+      } else {
+        text += `📝 *كشف العمليات والحركات المالية الفعلية (المبالغ > 0):*\n`;
+        text += `*(إجمالي الحركات النشطة المسجلة: ${rows.length} حركة)*\n\n`;
+
+        const maxItems = 25;
+        const slice = rows.slice(0, maxItems);
+        slice.forEach((r) => {
+          const icon = r.isCredit ? '🟢' : '🔴';
+          const sign = r.isCredit ? '(+)' : '(-)';
+          const d = r.date ? `[${r.date.split(' ')[0]}] ` : '';
+          text += `${icon} *${r.no}* ${d}\n   ▪️ ${r.type}: ${r.party}\n   ▪️ المبلغ: ${sign} *${r.amount.toLocaleString()} ج.م*\n`;
+        });
+
+        if (rows.length > maxItems) {
+          text += `\n... ℹ️ ويوجد عدد (${rows.length - maxItems}) حركة مالية نشطة إضافية.\n`;
+          text += `📌 *ملاحظة:* تم إدراج أحدث 25 حركة لمناسبة حجم الواتساب. يمكنك نسخ الكشف كاملاً أو استخراج Excel/PDF من شاشة المركز.\n`;
+        }
+      }
+
+      text += `════════════════════════════════\n`;
+      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
+      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
+
+      return text;
+    }
+
+    function shareCostCenterDirectWhatsApp(centerName, centerId, supervisor) {
+      const text = formatCostCenterStatementWhatsAppText(centerName, centerId, supervisor);
+      openWhatsAppModal(`كشف حساب: ${centerName}`, `إرسال كشف الحساب والعمليات التفصيلية عبر واتساب`, text);
     }
 
     function shareActiveCostCenterStatementWhatsApp() {
@@ -14036,150 +14112,89 @@ window.FULL_ERP_DATABASE = {
         return;
       }
       const { centerName, centerId, supervisor } = activeModalCostCenter;
-      const fin = getCostCenterFinancials(centerName);
-      const isProfit = fin.netProfit >= 0;
-      const profitSign = fin.netProfit > 0 ? '+' : '';
-      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+      shareCostCenterDirectWhatsApp(centerName, centerId, supervisor);
+    }
 
-      let text = `*شركة جرين رايت للاستثمار الزراعي*\n`;
-      text += `*كشف حساب تحليلي رسمي*\n`;
-      text += `المركز: *${centerName}* (#${centerId})\n`;
-      text += `المشرف: *${supervisor || 'الإدارة العامة'}*\n`;
-      text += `التاريخ: ${today}\n`;
-      text += `==============================\n`;
-      text += `المبيعات   : ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
-      text += `المصروفات : ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
-      text += `صافي الربح : ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? ' [رابح]' : ' [عجز]'}\n`;
-      text += `==============================\n`;
-      text += `*أهم العمليات الأخيرة:*\n`;
-
-      let allItems = [];
-      fin.salesList.slice(0, 5).forEach(s => allItems.push(`- فاتورة #${s.invoiceNo} لـ (${s.clientName || 'عميل'}): ${(Number(s.netAmount || s.amount) || 0).toLocaleString()} ج.م`));
-      fin.paymentsList.slice(0, 5).forEach(p => allItems.push(`- صرف #${p.paymentNo} (${p.payeeName || p.detail}): ${(Number(p.amount) || 0).toLocaleString()} ج.م`));
-      
-      if (allItems.length > 0) {
-        text += allItems.slice(0, 8).join('\n') + '\n';
-      } else {
-        text += `- لا توجد حركات مسجلة لهذا المركز حتى الآن\n`;
+    function shareAllCostCentersWhatsApp() {
+      const list = getCostCentersList();
+      if (!list || list.length === 0) {
+        alert("لا توجد مراكز تكلفة مسجلة!");
+        return;
       }
-      text += `==============================\n`;
-      text += `نظام جرين رايت ERP السحابي\n`;
-      text += `تصميم وبرمجة / أكرم سعد - 01030108199`;
-
-      openWhatsAppModal(`كشف حساب: ${centerName}`, `إرسال كشف الحساب والعمليات التفصيلية عبر واتساب`, text);
-    }
-
-    function shareAllCostCentersWhatsApp() {
-      const list = getCostCentersList();
-      if (!list || list.length === 0) return;
       const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
       let grandSales = 0;
       let grandExpenses = 0;
-      let lines = [];
+      let activeCenters = [];
+      let zeroCenters = [];
 
       list.forEach(c => {
         const fin = getCostCenterFinancials(c.name);
         grandSales += fin.totalSales;
         grandExpenses += fin.totalExpenses;
-        const sign = fin.netProfit > 0 ? '+' : '';
-        lines.push(`🎯 *${c.name}* (#${c.id})\n  - مبيعات: ${fin.totalSales.toLocaleString()} ج.م\n  - مصروفات: ${fin.totalExpenses.toLocaleString()} ج.م\n  - صافي: ${sign}${fin.netProfit.toLocaleString()} ج.م`);
+
+        const hasData = (fin.totalSales > 0 || fin.totalExpenses > 0);
+        if (hasData) {
+          activeCenters.push({
+            center: c,
+            fin: fin
+          });
+        } else {
+          zeroCenters.push(c.name);
+        }
       });
 
       const grandNet = grandSales - grandExpenses;
       const grandSign = grandNet > 0 ? '+' : '';
 
       let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
-      text += `📊 *تقرير أرباح ومصروفات كافة القطاعات والمزارع*\n`;
+      text += `📊 *تقرير مراكز التكلفة والمزارع النشطة (التي بها حركات فعلية)*\n`;
       text += `📅 *تاريخ التقرير:* ${today}\n`;
-      text += `--------------------------------\n`;
-      text += `📈 *إجمالي مبيعات الشركة:* ${grandSales.toLocaleString()} ج.م\n`;
+      text += `════════════════════════════════\n`;
+      text += `📈 *إجمالي مبيعات كافة القطاعات:* ${grandSales.toLocaleString()} ج.م\n`;
       text += `📉 *إجمالي التكاليف والمصروفات:* ${grandExpenses.toLocaleString()} ج.م\n`;
-      text += `💰 *صافي أرباح النشاط الإجمالي:* ${grandSign}${grandNet.toLocaleString()} ج.م\n`;
-      text += `--------------------------------\n`;
-      text += `📌 *تفاصيل كل قطاع ومزرعة:*\n`;
-      text += lines.join('\n\n') + '\n';
-      text += `--------------------------------\n`;
+      text += `💰 *صافي أرباح النشاط العام:* ${grandSign}${grandNet.toLocaleString()} ج.م ${grandNet >= 0 ? '✅' : '⚠️'}\n`;
+      text += `════════════════════════════════\n`;
+
+      if (activeCenters.length === 0) {
+        text += `⚠️ *تنبيه:* لا توجد حالياً أي مراكز بها بيانات أو أرقام مالية فعلية.\n`;
+      } else {
+        text += `🎯 *القطاعات والمزارع التي بها بيانات وأرقام فعلية (${activeCenters.length} قطاع):*\n\n`;
+        activeCenters.forEach((ac, idx) => {
+          const sign = ac.fin.netProfit > 0 ? '+' : '';
+          text += `${idx + 1}️⃣ *${ac.center.name}* (كود: #${ac.center.id})\n`;
+          text += `   👤 المشرف: ${ac.center.supervisor || 'الإدارة العامة'}\n`;
+          text += `   ▪️ مبيعات: ${ac.fin.totalSales.toLocaleString()} ج.م (${ac.fin.salesCount} فاتورة)\n`;
+          text += `   ▪️ مصروفات: ${ac.fin.totalExpenses.toLocaleString()} ج.م (${ac.fin.paymentsCount + ac.fin.purchasesCount} حركة)\n`;
+          text += `   ▪️ صافي القطاع: *${sign}${ac.fin.netProfit.toLocaleString()} ج.م* ${ac.fin.netProfit >= 0 ? '✅' : '⚠️'}\n`;
+          
+          // Add top 3 active non-zero operations for this center if available
+          let recentMoves = [];
+          (ac.fin.salesList || []).slice(0, 3).forEach(s => {
+            const amt = parseFloat(s.netAmount || s.amount) || 0;
+            if (amt > 0) recentMoves.push(`      ▫️ فاتورة #${s.invoiceNo} لـ (${s.clientName || 'عميل'}): ${amt.toLocaleString()} ج.م`);
+          });
+          (ac.fin.paymentsList || []).slice(0, 3).forEach(p => {
+            const amt = parseFloat(p.amount) || 0;
+            if (amt > 0) recentMoves.push(`      ▫️ سند #${p.paymentNo} (${p.payeeName || p.detail}): ${amt.toLocaleString()} ج.م`);
+          });
+          if (recentMoves.length > 0) {
+            text += `   🔹 *أهم العمليات الأخيرة:*\n` + recentMoves.slice(0, 4).join('\n') + `\n`;
+          }
+          text += `--------------------------------\n`;
+        });
+      }
+
+      if (zeroCenters.length > 0) {
+        text += `\n🚫 *مراكز بدون حركات (تم استبعادها لعدم وجود أرقام - رصيد صفري: ${zeroCenters.length} مركز):*\n`;
+        text += `( ${zeroCenters.join(' - ')} )\n`;
+      }
+
+      text += `════════════════════════════════\n`;
       text += `✨ *نظام جرين رايت ERP السحابي*\n`;
       text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
 
-      openWhatsAppModal(`تقرير مراكز التكلفة الشامل`, `إرسال التقرير المالي التنفيذي العام للشركة عبر واتساب`, text);
-    }
-
-    function shareActiveCostCenterStatementWhatsApp() {
-      if (!activeModalCostCenter) return;
-      const { centerName, centerId, supervisor } = activeModalCostCenter;
-      const fin = getCostCenterFinancials(centerName);
-      const isProfit = fin.netProfit >= 0;
-      const profitSign = fin.netProfit > 0 ? '+' : '';
-      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-
-      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
-      text += `📋 *كشف حساب تفصيلي لقطاع:* ${centerName} (#${centerId})\n`;
-      text += `👤 *المشرف:* ${supervisor || 'الإدارة العامة'} | 📅 *التاريخ:* ${today}\n`;
-      text += `--------------------------------\n`;
-      text += `📈 *إجمالي المبيعات:* ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
-      text += `📉 *إجمالي المصروفات:* ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
-      text += `💰 *صافي المركز:* ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? '✅' : '⚠️'}\n`;
-      text += `--------------------------------\n`;
-      text += `📝 *أهم العمليات الأخيرة:*\n`;
-
-      // Combine sales, payments, purchases and take top 5
-      let allItems = [];
-      fin.salesList.slice(0, 5).forEach(s => allItems.push(`▫️ فاتورة #${s.invoiceNo} لـ (${s.clientName || 'عميل'}) بـ ${(Number(s.netAmount || s.amount) || 0).toLocaleString()} ج.م`));
-      fin.paymentsList.slice(0, 5).forEach(p => allItems.push(`▫️ سند صرف #${p.paymentNo}: (${p.payeeName || p.detail}) بـ ${(Number(p.amount) || 0).toLocaleString()} ج.م`));
-      
-      text += allItems.slice(0, 8).join('\n') + '\n';
-      text += `--------------------------------\n`;
-      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
-      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
-
-      const phone = prompt("📱 أدخل رقم هاتف الواتساب لإرسال كشف الحساب (أو اضغط OK للمتابعة مباشرة):", "");
-      if (phone === null) return;
-      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
-    }
-
-    function shareAllCostCentersWhatsApp() {
-      const list = getCostCentersList();
-      if (!list || list.length === 0) return;
-      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-
-      let grandSales = 0;
-      let grandExpenses = 0;
-      let lines = [];
-
-      list.forEach(c => {
-        const fin = getCostCenterFinancials(c.name);
-        grandSales += fin.totalSales;
-        grandExpenses += fin.totalExpenses;
-        const sign = fin.netProfit > 0 ? '+' : '';
-        lines.push(`🎯 *${c.name}* (#${c.id})\n  - مبيعات: ${fin.totalSales.toLocaleString()} ج.م\n  - مصروفات: ${fin.totalExpenses.toLocaleString()} ج.م\n  - صافي: ${sign}${fin.netProfit.toLocaleString()} ج.م`);
-      });
-
-      const grandNet = grandSales - grandExpenses;
-      const grandSign = grandNet > 0 ? '+' : '';
-
-      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
-      text += `📊 *تقرير أرباح ومصروفات كافة القطاعات والمزارع*\n`;
-      text += `📅 *تاريخ التقرير:* ${today}\n`;
-      text += `--------------------------------\n`;
-      text += `📈 *إجمالي مبيعات الشركة:* ${grandSales.toLocaleString()} ج.م\n`;
-      text += `📉 *إجمالي التكاليف والمصروفات:* ${grandExpenses.toLocaleString()} ج.م\n`;
-      text += `💰 *صافي أرباح النشاط الإجمالي:* ${grandSign}${grandNet.toLocaleString()} ج.م\n`;
-      text += `--------------------------------\n`;
-      text += `📌 *تفاصيل كل قطاع ومزرعة:*\n`;
-      text += lines.join('\n\n') + '\n';
-      text += `--------------------------------\n`;
-      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
-      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
-
-      const phone = prompt("📱 أدخل رقم هاتف الواتساب للمدير أو المحاسب (أو اضغط OK للمتابعة مباشرة):", "");
-      if (phone === null) return;
-      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      openWhatsAppModal(`تقرير مراكز التكلفة الشامل`, `إرسال تقرير القطاعات ذات البيانات الفعلية عبر واتساب`, text);
     }
 
   
