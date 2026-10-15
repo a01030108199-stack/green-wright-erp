@@ -8147,117 +8147,30 @@ window.FULL_ERP_DATABASE = {
   <div id="mainAppWrapper" class="hidden flex-1 flex flex-col">
   <!-- ==================== TOP NAVIGATION HEADER ==================== -->
   <header class="bg-[#0f1d36]/95 border-b border-blue-900/40 sticky top-0 z-30 no-print shadow-lg backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-6">
       <div class="flex items-center justify-between h-16">
         
-        <!-- Brand Logo -->
+        <!-- Right: Toggle Sidebar + Brand Logo -->
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/30">
-            ⚡
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-extrabold text-base text-white tracking-tight">جرين رايت للاستثمار الزراعي</h1>
-              <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">ERP زراعي ذكي</span>
+          <button onclick="toggleSidebarCollapse()" class="p-2 rounded-xl bg-[#060d1a]/80 border border-blue-900/40 hover:bg-blue-900/40 text-blue-300 hover:text-white transition cursor-pointer flex items-center justify-center w-10 h-10" title="طي / توسيع القائمة الجانبية">
+            <span class="text-lg">☰</span>
+          </button>
+
+          <div class="flex items-center gap-2.5">
+            <img src="green-wright-logo.png" alt="جرين رايت" class="h-10 w-10 object-contain rounded-lg bg-white/5 p-1 border border-blue-800/40 shadow-md">
+            <div>
+              <div class="font-extrabold text-white text-sm sm:text-base tracking-tight flex items-center gap-2">
+                <span>جرين رايت للاستثمار الزراعي</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60 hidden sm:inline-block">النسخة السحابية</span>
+              </div>
+              <div class="text-[11px] text-slate-400 hidden md:block">منظومة الإدارة المتكاملة والمحاسبة العامة</div>
             </div>
-            <p class="text-[11px] font-medium text-slate-400">إدارة فواتير المبيعات، الأقساط، كشوف الحسابات، والخزينة</p>
           </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <nav class="flex items-center gap-1 bg-[#060d1a]/80 p-1.5 rounded-xl border border-blue-900/30 text-xs font-semibold">
-          <!-- Primary Actions -->
-          <button onclick="switchTab('new-invoice')" id="tab-new-invoice" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 font-bold">
-            <span>✨</span>
-            <span>فاتورة مبيعات جديدة</span>
-          </button>
-
-          <button onclick="switchTab('receipts')" id="tab-receipts" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30">
-            <span>💳</span>
-            <span>سندات القبض</span>
-          </button>
-          
-          <button onclick="switchTab('payments')" id="tab-payments" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30">
-            <span>💸</span>
-            <span>سندات الصرف</span>
-          </button>
-          
-          <button onclick="switchTab('invoices')" id="tab-invoices" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30">
-            <span>🧾</span>
-            <span>سجل الفواتير</span>
-            <span id="countInvoicesBadge" class="bg-blue-950/80 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">211</span>
-          </button>
-          
-          <button onclick="switchTab('clients')" id="tab-clients" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30">
-            <span>👥</span>
-            <span>دليل العملاء</span>
-            <span id="countClientsBadge" class="bg-blue-950/80 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">78</span>
-          </button>
-
-          <!-- More Dropdown Menu (الزيادة في قائمة منسدلة أنيقة) -->
-          <div class="relative inline-block text-right" id="moreDropdownContainer">
-            <button onclick="toggleMoreMenu(event)" id="tab-more" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-blue-900/40 border border-blue-900/40">
-              <span id="moreTabIcon">📂</span>
-              <span id="moreTabTitle">المزيد من الأقسام</span>
-              <span class="text-[9px] text-slate-400">▾</span>
-            </button>
-
-            <!-- Dropdown Box -->
-            <div id="moreTabsDropdown" class="hidden absolute left-0 mt-2 w-64 bg-[#0a1426] border border-blue-900/80 rounded-2xl shadow-2xl py-2 z-50 backdrop-blur-xl divide-y divide-blue-900/30 text-xs">
-              <div class="px-3 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">السجلات والكتالوج</div>
-              <div class="py-1">
-                <button onclick="switchTab('suppliers'); toggleMoreMenu(false);" id="tab-suppliers" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>🏭</span><span>الموردين</span></div>
-                  <span id="countSuppliersBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">21</span>
-                </button>
-                <button onclick="switchTab('items'); toggleMoreMenu(false);" id="tab-items" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>📦</span><span>الأصناف الزراعية</span></div>
-                  <span id="countItemsBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">97</span>
-                </button>
-              </div>
-
-              <div class="px-3 pt-2 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">المحاسبة العامة</div>
-              <div class="py-1">
-                <button onclick="switchTab('accounts'); toggleMoreMenu(false);" id="tab-accounts" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>🌳</span><span>دليل الحسابات</span></div>
-                  <span id="countAccountsBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">251</span>
-                </button>
-                <button onclick="switchTab('entries'); toggleMoreMenu(false);" id="tab-entries" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>📖</span><span>قيود اليومية</span></div>
-                  <span id="countEntriesBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">793</span>
-                </button>
-                <button onclick="switchTab('purchases'); toggleMoreMenu(false);" id="tab-purchases" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>🛒</span><span>فواتير المشتريات</span></div>
-                  <span id="countPurchasesBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">42</span>
-                </button>
-                <button onclick="switchTab('trial'); toggleMoreMenu(false);" id="tab-trial" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>⚖️</span><span>ميزان المراجعة</span></div>
-                  <span id="countTrialBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold">115</span>
-                </button>
-              </div>
-
-              <div class="px-3 pt-2 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">التقارير والإدارة</div>
-              <div class="py-1">
-                <button onclick="switchTab('analytics'); toggleMoreMenu(false);" id="tab-analytics" class="w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition">
-                  <div class="flex items-center gap-2"><span>📊</span><span>مؤشرات الأداء</span></div>
-                  <span class="px-1.5 py-0.2 text-[9px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/40 rounded-full">تحليل</span>
-                </button>
-                <button onclick="switchTab('admin'); toggleMoreMenu(false);" id="tab-admin" class="hidden w-full text-right px-3.5 py-2 flex items-center justify-between text-purple-300 hover:text-white hover:bg-purple-900/40 transition">
-                  <div class="flex items-center gap-2"><span>⚙️</span><span>لوحة الإدارة</span></div>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sidebar Drawer Toggle (القائمة الجانبية في جانب الشاشة) -->
-          <button onclick="toggleSidebarMenu(true)" class="px-2.5 py-1.5 rounded-lg bg-[#0d182e] hover:bg-blue-900 text-blue-300 hover:text-white border border-blue-800/40 flex items-center gap-1.5 transition ml-1" title="فتح القائمة الجانبية الكاملة">
-            <span class="text-sm">☰</span>
-            <span class="hidden sm:inline">القائمة الجانبية</span>
-          </button>
-        </nav>
-
-        <!-- User Info & Quick Stats -->
-        <div class="flex items-center gap-3">
+        <!-- Left: Stats + Cloud + Active User + Logout -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Treasury Quick Display -->
           <div class="hidden xl:flex items-center gap-3 bg-[#060d1a]/80 border border-blue-900/40 px-3 py-1.5 rounded-xl">
             <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
             <div class="text-right">
@@ -8266,9 +8179,9 @@ window.FULL_ERP_DATABASE = {
             </div>
           </div>
 
-          <!-- Cloud Sync Status Badge -->
+          <!-- Cloud Sync Badge -->
           <button onclick="openCloudSyncSettings()" id="cloudSyncHeaderBadge" title="إعدادات وحالة المزامنة السحابية" 
-                  class="hidden sm:flex items-center gap-2 bg-[#060d1a]/80 border border-blue-900/40 hover:border-blue-500/50 px-2.5 py-1.5 rounded-xl transition cursor-pointer text-xs">
+                  class="flex items-center gap-2 bg-[#060d1a]/80 border border-blue-900/40 hover:border-blue-500/50 px-2.5 py-1.5 rounded-xl transition cursor-pointer text-xs">
             <div id="cloudSyncStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
             <div class="text-right">
               <div class="text-[9px] text-slate-400 font-bold flex items-center gap-1">
@@ -8279,21 +8192,21 @@ window.FULL_ERP_DATABASE = {
           </button>
 
           <!-- Active User Badge -->
-          <div id="activeUserBadge" class="flex items-center gap-2 bg-[#060d1a]/80 border border-blue-900/40 px-3 py-1.5 rounded-xl">
+          <div id="activeUserBadge" class="flex items-center gap-2 bg-[#060d1a]/80 border border-blue-900/40 px-2.5 py-1.5 rounded-xl">
             <div class="w-7 h-7 rounded-lg bg-blue-600/30 border border-blue-500/40 text-blue-300 flex items-center justify-center text-xs font-bold" id="userAvatar">
               👤
             </div>
-            <div class="text-right">
+            <div class="text-right hidden sm:block">
               <div class="text-xs font-bold text-white leading-tight" id="activeUserName">المستخدم</div>
               <div class="text-[9px] text-emerald-400 font-semibold" id="activeUserRole">نشط الآن</div>
             </div>
           </div>
 
-          <!-- Prominent Logout Button -->
+          <!-- Logout Button -->
           <button onclick="handleLogout()" title="تسجيل الخروج والرجوع لشاشة كلمة المرور" 
                   class="flex items-center gap-1.5 bg-gradient-to-r from-rose-950/90 to-red-950/90 hover:from-rose-600 hover:to-red-600 text-rose-300 hover:text-white border border-rose-800/60 hover:border-rose-500 px-3 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-rose-950/50 cursor-pointer active:scale-95">
             <span class="text-sm">🚪</span>
-            <span>تسجيل الخروج</span>
+            <span class="hidden sm:inline">تسجيل الخروج</span>
           </button>
         </div>
 
@@ -8302,7 +8215,154 @@ window.FULL_ERP_DATABASE = {
   </header>
 
   <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+  
+  <!-- ==================== APP WRAPPER: PERMANENT SIDEBAR + MAIN CONTENT ==================== -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- Mobile Backdrop Overlay -->
+    <div id="sidebarMobileOverlay" onclick="closeMobileSidebar()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-30 lg:hidden transition-opacity"></div>
+
+    <!-- PERMANENT VERTICAL SIDEBAR (القائمة الجانبية الرأسية الثابتة لكافة الأقسام) -->
+    <aside id="mainSidebar" class="w-64 bg-[#091222] border-l border-blue-900/50 flex flex-col justify-between transition-all duration-300 z-40 fixed inset-y-0 right-0 lg:static flex-shrink-0 select-none overflow-y-auto no-print shadow-2xl lg:shadow-none translate-x-full lg:translate-x-0">
+      
+      <!-- Top Section Inside Sidebar for Mobile Close -->
+      <div class="flex items-center justify-between p-4 border-b border-blue-900/40 lg:hidden">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚡</span>
+          <span class="font-bold text-white text-sm">أقسام المنظومة</span>
+        </div>
+        <button onclick="closeMobileSidebar()" class="text-slate-400 hover:text-white p-1 text-base">✕</button>
+      </div>
+
+      <!-- Scrollable Navigation Items -->
+      <div class="p-3 space-y-4 text-xs flex-1 overflow-y-auto">
+
+        <!-- 1. العمليات والمالية -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1.5 sidebar-label">العمليات السريعة</div>
+          <div class="space-y-1">
+            <button onclick="switchTab('new-invoice')" id="tab-new-invoice" class="w-full text-right px-3 py-2.5 rounded-xl transition-all flex items-center justify-between bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 font-bold border-r-4 border-emerald-300">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">✨</span>
+                <span class="sidebar-label font-bold">فاتورة مبيعات جديدة</span>
+              </div>
+            </button>
+            <button onclick="switchTab('receipts')" id="tab-receipts" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">💳</span>
+                <span class="sidebar-label">سندات القبض النقدية</span>
+              </div>
+            </button>
+            <button onclick="switchTab('payments')" id="tab-payments" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">💸</span>
+                <span class="sidebar-label">سندات الصرف والمدفوعات</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. السجلات والكتالوج -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1.5 sidebar-label">السجلات والكتالوج</div>
+          <div class="space-y-1">
+            <button onclick="switchTab('invoices')" id="tab-invoices" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">🧾</span>
+                <span class="sidebar-label">سجل الفواتير</span>
+              </div>
+              <span id="countInvoicesBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">211</span>
+            </button>
+            <button onclick="switchTab('clients')" id="tab-clients" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">👥</span>
+                <span class="sidebar-label">دليل العملاء</span>
+              </div>
+              <span id="countClientsBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">78</span>
+            </button>
+            <button onclick="switchTab('suppliers')" id="tab-suppliers" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">🏭</span>
+                <span class="sidebar-label">دليل الموردين</span>
+              </div>
+              <span id="countSuppliersBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">21</span>
+            </button>
+            <button onclick="switchTab('items')" id="tab-items" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📦</span>
+                <span class="sidebar-label">الأصناف الزراعية</span>
+              </div>
+              <span id="countItemsBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">97</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. المحاسبة العامة -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1.5 sidebar-label">المحاسبة العامة</div>
+          <div class="space-y-1">
+            <button onclick="switchTab('accounts')" id="tab-accounts" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">🌳</span>
+                <span class="sidebar-label">دليل الحسابات</span>
+              </div>
+              <span id="countAccountsBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">251</span>
+            </button>
+            <button onclick="switchTab('entries')" id="tab-entries" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📖</span>
+                <span class="sidebar-label">دفتر قيود اليومية</span>
+              </div>
+              <span id="countEntriesBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">793</span>
+            </button>
+            <button onclick="switchTab('purchases')" id="tab-purchases" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">🛒</span>
+                <span class="sidebar-label">فواتير المشتريات</span>
+              </div>
+              <span id="countPurchasesBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">42</span>
+            </button>
+            <button onclick="switchTab('trial')" id="tab-trial" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">⚖️</span>
+                <span class="sidebar-label">ميزان المراجعة</span>
+              </div>
+              <span id="countTrialBadge" class="bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge">115</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. التقارير والإدارة -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1.5 sidebar-label">التقارير والإدارة</div>
+          <div class="space-y-1">
+            <button onclick="switchTab('analytics')" id="tab-analytics" class="w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📊</span>
+                <span class="sidebar-label">مؤشرات الأداء</span>
+              </div>
+              <span class="bg-emerald-950 text-emerald-300 border border-emerald-800/40 px-2 py-0.5 rounded-full text-[9px] font-bold sidebar-badge">تحليل</span>
+            </button>
+            <button onclick="switchTab('admin')" id="tab-admin" class="hidden w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-purple-300 hover:text-white hover:bg-purple-900/40">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">⚙️</span>
+                <span class="sidebar-label">لوحة الإدارة</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-blue-900/40 bg-[#060d1a] text-center text-[10px] text-slate-400 sidebar-footer">
+        <div>تصميم وبرمجة / <span class="text-emerald-400 font-bold">أكرم سعد</span></div>
+        <div class="text-slate-400">01030108199</div>
+      </div>
+    </aside>
+
+    <!-- MAIN SCROLLABLE CONTENT (مساحة المحتوى الرئيسية الواسعة) -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#0b1528] w-full">
 
     <!-- ==================== TAB 0: NEW INVOICE (إنشاء فاتورة مبيعات جديدة ذكية) ==================== -->
     <div id="section-new-invoice" class="space-y-6">
@@ -8810,6 +8870,7 @@ window.FULL_ERP_DATABASE = {
                    class="w-full bg-[#0b1528] border border-blue-900/50 text-white placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition">
           </div>
         </div>
+      </div>
         <div class="overflow-x-auto max-h-[620px] overflow-y-auto rounded-xl border border-blue-900/40">
           <table class="w-full text-right text-xs">
             <thead class="sticky top-0 bg-[#060d1a] backdrop-blur-md text-blue-200 font-bold border-b border-blue-900/50 z-10">
@@ -9641,9 +9702,9 @@ window.FULL_ERP_DATABASE = {
         </div>
 
       </div>
-    </div>
 
   </main>
+  </div> <!-- END APP WRAPPER -->
   </div><!-- /mainAppWrapper -->
 
   <!-- ==================== MODAL 1: PRINT INVOICE MODAL (فاتورة مبيعات مطابقة لأوراق الشركة) ==================== -->
@@ -10239,24 +10300,28 @@ window.FULL_ERP_DATABASE = {
           return;
         }
       }
-      const tabs = ['new-invoice', 'receipts', 'payments', 'invoices', 'clients', 'suppliers', 'items', 'accounts', 'entries', 'purchases', 'trial', 'analytics', 'admin'];
-      const subTabs = ['suppliers', 'items', 'accounts', 'entries', 'purchases', 'trial', 'analytics', 'admin'];
+      const tabs = [
+        'new-invoice', 'receipts', 'payments', 'invoices', 'clients',
+        'suppliers', 'items', 'accounts', 'entries', 'purchases',
+        'trial', 'analytics', 'admin'
+      ];
 
       tabs.forEach(t => {
         const sec = document.getElementById('section-' + t);
         if (sec) sec.classList.add('hidden');
+        
         const btn = document.getElementById('tab-' + t);
         if (btn) {
-          if (subTabs.includes(t)) {
-            btn.className = "w-full text-right px-3.5 py-2 flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/40 transition";
-          } else if (t === 'new-invoice') {
-            btn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-emerald-400 hover:text-white hover:bg-emerald-900/30";
+          if (t === 'new-invoice') {
+            btn.className = "w-full text-right px-3 py-2.5 rounded-xl transition-all flex items-center justify-between text-emerald-400 hover:text-white hover:bg-emerald-900/30";
+          } else if (t === 'admin') {
+            btn.className = "w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-purple-400 hover:text-white hover:bg-purple-900/30";
           } else {
-            btn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-blue-900/30";
+            btn.className = "w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between text-slate-300 hover:text-white hover:bg-blue-900/30";
           }
-          const badge = btn.querySelector('span:last-child');
-          if (badge && badge.tagName === 'SPAN' && t !== 'receipts' && t !== 'payments' && t !== 'new-invoice' && !subTabs.includes(t)) {
-            badge.className = "bg-blue-950/80 text-blue-300 border border-blue-800/40 px-1.5 py-0.2 rounded-full text-[10px] font-bold";
+          const badge = btn.querySelector('.sidebar-badge');
+          if (badge) {
+            badge.className = "bg-blue-950 text-blue-300 border border-blue-800/40 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge";
           }
         }
       });
@@ -10266,47 +10331,22 @@ window.FULL_ERP_DATABASE = {
 
       const activeBtn = document.getElementById('tab-' + tab);
       if (activeBtn) {
-        if (subTabs.includes(tab)) {
-          activeBtn.className = "w-full text-right px-3.5 py-2 flex items-center justify-between bg-blue-600/30 text-blue-200 font-bold border-r-2 border-blue-500 transition";
-        } else if (tab === 'new-invoice') {
-          activeBtn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 font-bold";
+        if (tab === 'new-invoice') {
+          activeBtn.className = "w-full text-right px-3 py-2.5 rounded-xl transition-all flex items-center justify-between bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-bold border-r-4 border-emerald-300";
         } else if (tab === 'admin') {
-          activeBtn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold";
+          activeBtn.className = "w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30 font-bold border-r-4 border-purple-300";
         } else {
-          activeBtn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-md shadow-blue-600/30 font-bold";
+          activeBtn.className = "w-full text-right px-3 py-2 rounded-xl transition-all flex items-center justify-between bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-bold border-r-4 border-blue-400";
         }
-        const activeBadge = activeBtn.querySelector('span:last-child');
-        if (activeBadge && activeBadge.tagName === 'SPAN' && tab !== 'receipts' && tab !== 'payments' && tab !== 'new-invoice' && !subTabs.includes(tab)) {
-          activeBadge.className = "bg-blue-900 text-white border border-blue-400/30 px-1.5 py-0.2 rounded-full text-[10px] font-bold";
+        const activeBadge = activeBtn.querySelector('.sidebar-badge');
+        if (activeBadge) {
+          activeBadge.className = "bg-blue-900 text-white border border-blue-400/30 px-2 py-0.5 rounded-full text-[10px] font-bold sidebar-badge";
         }
       }
 
-      // Handle the 'tab-more' dropdown button title and highlight
-      const tabMore = document.getElementById('tab-more');
-      const moreTitle = document.getElementById('moreTabTitle');
-      const moreIcon = document.getElementById('moreTabIcon');
-      if (tabMore && moreTitle && moreIcon) {
-        if (subTabs.includes(tab)) {
-          tabMore.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-md shadow-blue-600/30 font-bold border border-blue-500";
-          const names = {
-            'suppliers': ['الموردين (21)', '🏭'],
-            'items': ['الأصناف (97)', '📦'],
-            'accounts': ['دليل الحسابات (251)', '🌳'],
-            'entries': ['قيود اليومية (793)', '📖'],
-            'purchases': ['المشتريات (42)', '🛒'],
-            'trial': ['ميزان المراجعة (115)', '⚖️'],
-            'analytics': ['مؤشرات الأداء', '📊'],
-            'admin': ['لوحة الإدارة', '⚙️']
-          };
-          if (names[tab]) {
-            moreTitle.textContent = names[tab][0];
-            moreIcon.textContent = names[tab][1];
-          }
-        } else {
-          tabMore.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-blue-900/40 border border-blue-900/40";
-          moreTitle.textContent = "المزيد من الأقسام";
-          moreIcon.textContent = "📂";
-        }
+      // Close mobile sidebar if open on smaller screens
+      if (window.innerWidth < 1024) {
+        closeMobileSidebar();
       }
 
       // Explicitly trigger render for selected tab
@@ -13275,104 +13315,49 @@ window.FULL_ERP_DATABASE = {
       }
     }
 
+  
+
+    // ==================== SIDEBAR CONTROLLERS ====================
+    let isSidebarCollapsed = false;
+
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('mainSidebar');
+      const overlay = document.getElementById('sidebarMobileOverlay');
+      if (!sidebar) return;
+
+      if (window.innerWidth < 1024) {
+        // Mobile behavior: slide in/out
+        if (sidebar.classList.contains('translate-x-full')) {
+          sidebar.classList.remove('translate-x-full');
+          if (overlay) overlay.classList.remove('hidden');
+        } else {
+          closeMobileSidebar();
+        }
+      } else {
+        // Desktop behavior: toggle collapse width (w-64 vs w-20)
+        isSidebarCollapsed = !isSidebarCollapsed;
+        if (isSidebarCollapsed) {
+          sidebar.classList.remove('w-64');
+          sidebar.classList.add('w-20');
+          document.querySelectorAll('.sidebar-label, .sidebar-badge, .sidebar-footer').forEach(el => el.classList.add('hidden'));
+        } else {
+          sidebar.classList.remove('w-20');
+          sidebar.classList.add('w-64');
+          document.querySelectorAll('.sidebar-label, .sidebar-badge, .sidebar-footer').forEach(el => el.classList.remove('hidden'));
+        }
+      }
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('mainSidebar');
+      const overlay = document.getElementById('sidebarMobileOverlay');
+      if (sidebar) sidebar.classList.add('translate-x-full');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
   </script>
 
-  <!-- ==================== SIDEBAR DRAWER (القائمة الجانبية المنزلقة) ==================== -->
-  <div id="sidebarOverlay" onclick="toggleSidebarMenu(false)" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300"></div>
-
-  <aside id="sidebarDrawer" class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#091222] border-l border-blue-900/60 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-full flex flex-col justify-between overflow-y-auto">
-    <div class="p-5">
-      <!-- Drawer Header -->
-      <div class="flex items-center justify-between pb-4 border-b border-blue-900/40 mb-4">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-md">⚡</div>
-          <div>
-            <div class="font-extrabold text-white text-sm">جرين رايت للاستثمار</div>
-            <div class="text-[10px] text-slate-400">القائمة الجانبية لكافة الأقسام</div>
-          </div>
-        </div>
-        <button onclick="toggleSidebarMenu(false)" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
-      </div>
-
-      <!-- Drawer Links Grouped -->
-      <div class="space-y-4 text-xs">
-        <div>
-          <div class="text-[10px] font-bold text-slate-400 mb-2 px-2 uppercase tracking-wider">العمليات اليومية</div>
-          <div class="space-y-1">
-            <button onclick="switchTab('new-invoice'); toggleSidebarMenu(false);" class="w-full text-right p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold flex items-center gap-2 shadow-md">
-              <span>✨</span><span>فاتورة مبيعات جديدة</span>
-            </button>
-            <button onclick="switchTab('receipts'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center gap-2 transition">
-              <span>💳</span><span>سندات القبض النقدي</span>
-            </button>
-            <button onclick="switchTab('payments'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center gap-2 transition">
-              <span>💸</span><span>سندات الصرف والمدفوعات</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div class="text-[10px] font-bold text-slate-400 mb-2 px-2 uppercase tracking-wider">السجلات والعملاء</div>
-          <div class="space-y-1">
-            <button onclick="switchTab('invoices'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>🧾</span><span>سجل الفواتير</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">211</span>
-            </button>
-            <button onclick="switchTab('clients'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>👥</span><span>دليل العملاء وكشوف الحساب</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">78</span>
-            </button>
-            <button onclick="switchTab('suppliers'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>🏭</span><span>دليل الموردين</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">21</span>
-            </button>
-            <button onclick="switchTab('items'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>📦</span><span>كتالوج الأصناف الزراعية</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">97</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div class="text-[10px] font-bold text-slate-400 mb-2 px-2 uppercase tracking-wider">المحاسبة العامة والقيود</div>
-          <div class="space-y-1">
-            <button onclick="switchTab('accounts'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>🌳</span><span>دليل الحسابات (الشجرة)</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">251</span>
-            </button>
-            <button onclick="switchTab('entries'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>📖</span><span>دفتر قيود اليومية</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">793</span>
-            </button>
-            <button onclick="switchTab('purchases'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>🛒</span><span>سجل فواتير المشتريات</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">42</span>
-            </button>
-            <button onclick="switchTab('trial'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>⚖️</span><span>ميزان المراجعة المالي</span></div>
-              <span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-bold">115</span>
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <div class="text-[10px] font-bold text-slate-400 mb-2 px-2 uppercase tracking-wider">الإدارة والتقارير</div>
-          <div class="space-y-1">
-            <button onclick="switchTab('analytics'); toggleSidebarMenu(false);" class="w-full text-right p-2 rounded-xl text-slate-300 hover:bg-blue-900/40 hover:text-white flex items-center justify-between transition">
-              <div class="flex items-center gap-2"><span>📊</span><span>مؤشرات الأداء والتحليلات</span></div>
-              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-950 text-emerald-300 rounded-full">جديد</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Drawer Footer -->
-    <div class="p-4 border-t border-blue-900/40 bg-[#060d1a] text-center text-[10px] text-slate-400">
-      <div>تصميم وبرمجه / <span class="text-emerald-400 font-bold">اكرم سعد</span></div>
-      <div>01030108199</div>
-    </div>
-  </aside>
+  
 
 </body>
 </html>
