@@ -8089,68 +8089,68 @@ window.FULL_ERP_DATABASE = {
         <p class="text-xs text-emerald-400 font-bold mt-0.5">المنظومة المحاسبية للأسمدة والمبيدات الزراعية</p>
       </div>
 
-      <!-- Pinned Credentials Info Banner -->
-      <div class="mb-4 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl p-3 text-xs text-emerald-200 flex items-center justify-between shadow-inner">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-base shrink-0">📌</div>
-          <div>
-            <div class="font-bold text-white text-[12px] flex items-center gap-1.5">
-              <span>بيانات الدخول مثبتة وجاهزة:</span>
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            </div>
-            <div class="text-[11px] text-emerald-300 font-mono mt-0.5">
-              المستخدم: <strong class="text-white font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">admin</strong> | كلمة المرور: <strong class="text-white font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">123456</strong>
-            </div>
-          </div>
+      <!-- Step 1: Select User / Role Buttons (Prominent Front View) -->
+      <div>
+        <div class="text-xs text-slate-300 font-bold mb-3 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <span>👤</span>
+            <span>اختر المستخدم للدخول إلى النظام:</span>
+          </span>
+          <span class="text-[10px] text-emerald-400 font-normal">اضغط على الحساب المطلوب</span>
         </div>
-        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 shrink-0">دخول مباشر ⚡</span>
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <!-- Role 1: المدير العام -->
+          <button type="button" id="btnRoleAdmin" onclick="selectLoginRole('admin', '123456', 'المدير العام')" 
+                  class="bg-[#0f1d36] hover:bg-emerald-950/80 border-2 border-emerald-800/50 hover:border-emerald-500 text-emerald-300 py-3 px-1.5 rounded-2xl font-bold transition-all text-center cursor-pointer shadow-md active:scale-95 flex flex-col items-center gap-1">
+            <span class="text-2xl">👑</span>
+            <span class="text-xs text-white">المدير العام</span>
+            <span class="text-[10px] text-emerald-400 font-mono">admin</span>
+          </button>
+
+          <!-- Role 2: المحاسب -->
+          <button type="button" id="btnRoleAccountant" onclick="selectLoginRole('احمد', '123456', 'محاسب النظام')" 
+                  class="bg-[#0f1d36] hover:bg-blue-950/80 border-2 border-blue-800/50 hover:border-blue-500 text-blue-300 py-3 px-1.5 rounded-2xl font-bold transition-all text-center cursor-pointer shadow-md active:scale-95 flex flex-col items-center gap-1">
+            <span class="text-2xl">💼</span>
+            <span class="text-xs text-white">المحاسب</span>
+            <span class="text-[10px] text-blue-400 font-mono">احمد</span>
+          </button>
+
+          <!-- Role 3: المندوب -->
+          <button type="button" id="btnRoleRep" onclick="selectLoginRole('احمد مرضي', '123456', 'مندوب مبيعات')" 
+                  class="bg-[#0f1d36] hover:bg-teal-950/80 border-2 border-teal-800/50 hover:border-teal-500 text-teal-300 py-3 px-1.5 rounded-2xl font-bold transition-all text-center cursor-pointer shadow-md active:scale-95 flex flex-col items-center gap-1">
+            <span class="text-2xl">🌾</span>
+            <span class="text-xs text-white">المندوب</span>
+            <span class="text-[10px] text-teal-400 font-mono">احمد مرضي</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Login Form -->
-      <form onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex justify-between items-center">
-            <span>اسم المستخدم</span>
-            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">✓ مثبت مسبقاً</span>
-          </label>
-          <div class="relative">
-            <input type="text" id="loginUsernameInput" required value="admin" placeholder="مثال: admin أو احمد أو م/ سعد"
-                   class="w-full bg-[#0f1d36] border border-emerald-600/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition shadow-inner">
+      <!-- Hidden input for active selected user -->
+      <input type="hidden" id="loginUsernameInput" value="">
+      
+      <!-- Step 2: Credentials and Login Button (HIDDEN INITIALLY - APPEARS ONLY UPON SELECTING A ROLE!) -->
+      <div id="loginCredentialsSection" class="hidden transition-all duration-300 mt-5 pt-4 border-t border-emerald-900/50 space-y-4">
+        <!-- Selected Role Indicator Pill -->
+        <div class="bg-emerald-950/70 border border-emerald-500/40 rounded-xl p-2.5 flex items-center justify-between text-xs shadow-inner">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">الحساب المختار:</span>
+            <span id="selectedRoleBadge" class="bg-emerald-500/20 text-white px-2 py-0.5 rounded-md font-bold text-xs border border-emerald-400/30">المدير العام (admin)</span>
           </div>
+          <span class="text-[10px] text-emerald-300 font-mono">جاهز للدخول</span>
         </div>
 
+        <!-- Password Input -->
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5 flex justify-between items-center">
             <span>كلمة المرور</span>
-            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">✓ مثبتة مسبقاً</span>
+            <span class="text-[10px] text-emerald-400 font-normal">تم التثبيت تلقائياً (123456)</span>
           </label>
           <div class="relative">
-            <input type="text" id="loginPasswordInput" required value="123456" placeholder="••••••••"
+            <input type="password" id="loginPasswordInput" value="123456" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()"
                    class="w-full bg-[#0f1d36] border border-emerald-600/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition shadow-inner font-mono tracking-wider">
             <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-300 text-sm focus:outline-hidden p-1 cursor-pointer transition" title="إظهار / إخفاء كلمة المرور">
-              <span id="loginEyeIcon">🔒</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Quick Role Selector for Convenience -->
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5 flex items-center justify-between">
-            <span>⚡ اختيار مستخدم وتثبيته فوراً بنقرة واحدة:</span>
-            <span class="text-[10px] text-emerald-400 font-mono">3 حسابات مسجلة</span>
-          </label>
-          <div class="grid grid-cols-3 gap-2 text-[11px]">
-            <button type="button" onclick="setQuickLogin('admin', '123456', 'المدير العام')" class="bg-[#0f1d36] hover:bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
-              <span>👑 المدير العام</span>
-              <span class="text-[9px] text-slate-400 font-mono">admin</span>
-            </button>
-            <button type="button" onclick="setQuickLogin('احمد', '123456', 'محاسب النظام')" class="bg-[#0f1d36] hover:bg-blue-950/80 border border-blue-700/60 text-blue-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
-              <span>💼 المحاسب</span>
-              <span class="text-[9px] text-slate-400 font-mono">احمد</span>
-            </button>
-            <button type="button" onclick="setQuickLogin('احمد مرضي', '123456', 'مندوب مبيعات')" class="bg-[#0f1d36] hover:bg-teal-950/80 border border-teal-700/60 text-teal-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
-              <span>🌾 المندوب</span>
-              <span class="text-[9px] text-slate-400 font-mono">احمد مرضي</span>
+              <span id="loginEyeIcon">👁️</span>
             </button>
           </div>
         </div>
@@ -8159,11 +8159,13 @@ window.FULL_ERP_DATABASE = {
           اسم المستخدم أو كلمة المرور غير صحيحة!
         </div>
 
-        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-700/40 transition text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+        <!-- Big Login Action Button -->
+        <button type="button" id="loginSubmitBtn" onclick="handleLogin()" 
+                class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-700/40 transition text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
           <span class="text-base">🔐</span>
-          <span>تسجيل الدخول إلى النظام (دخول فوري)</span>
+          <span id="loginSubmitBtnText">تسجيل الدخول إلى النظام الآن 🚀</span>
         </button>
-      </form>
+      </div>
 
       <div class="mt-5 pt-3.5 border-t border-emerald-900/40 text-center">
         <div class="text-xs font-bold text-emerald-400 tracking-wide">
@@ -10232,15 +10234,77 @@ window.FULL_ERP_DATABASE = {
     const AGRI_UNITS = ["كجم", "لتر", "جركن 5 لتر", "250 جرام", "500 جرام", "200 جم", "100 سم", "250 سم", "500 سم", "عبوة 60جم", "شيكارة 25ك"];
 
     
-    // ==================== AUTHENTICATION ENGINE ====================
-    let currentUser = null;
+    // ==================== SYSTEM USERS & AUTHENTICATION ENGINE ====================
+    let systemUsers = [
+      { username: 'admin', pass: '123456', role: 'المدير العام' },
+      { username: 'احمد', pass: '123456', role: 'محاسب النظام' },
+      { username: 'احمد مرضي', pass: '123456', role: 'مندوب مبيعات' }
+    ];
 
-    function getSavedCredentials() {
+    function loadSavedUsers() {
       try {
-        const saved = localStorage.getItem('erp_saved_login_creds');
-        if (saved) return JSON.parse(saved);
-      } catch (e) {}
-      return { username: 'admin', pass: '123456' };
+        const saved = localStorage.getItem('erp_system_users');
+        if (saved) {
+          systemUsers = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error("Error loading users", e);
+      }
+      renderAdminUsersTable();
+    }
+
+    function saveUsersToStorage() {
+      try {
+        localStorage.setItem('erp_system_users', JSON.stringify(systemUsers));
+      } catch (e) {
+        console.error("Error saving users", e);
+      }
+    }
+
+    let currentUser = null;
+    let selectedUserRoleTitle = 'المدير العام';
+
+    function selectLoginRole(username, pass, roleTitle) {
+      const uInput = document.getElementById('loginUsernameInput');
+      const pInput = document.getElementById('loginPasswordInput');
+      if (uInput) uInput.value = username;
+      if (pInput) pInput.value = pass;
+      selectedUserRoleTitle = roleTitle;
+
+      // Update badge and button text
+      const badge = document.getElementById('selectedRoleBadge');
+      if (badge) badge.textContent = `${roleTitle} (${username})`;
+
+      const btnText = document.getElementById('loginSubmitBtnText');
+      if (btnText) btnText.textContent = `دخول إلى النظام كـ ${roleTitle} 🚀`;
+
+      // Highlight active role button
+      ['btnRoleAdmin', 'btnRoleAccountant', 'btnRoleRep'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) {
+          b.classList.remove('border-emerald-400', 'bg-emerald-950', 'ring-2', 'ring-emerald-400/50');
+          b.classList.add('border-emerald-800/50', 'bg-[#0f1d36]');
+        }
+      });
+
+      let targetBtnId = 'btnRoleAdmin';
+      if (username === 'احمد') targetBtnId = 'btnRoleAccountant';
+      else if (username === 'احمد مرضي') targetBtnId = 'btnRoleRep';
+
+      const activeBtn = document.getElementById(targetBtnId);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-emerald-800/50', 'bg-[#0f1d36]');
+        activeBtn.classList.add('border-emerald-400', 'bg-emerald-950', 'ring-2', 'ring-emerald-400/50');
+      }
+
+      // REVEAL the credentials and login button section!
+      const credsSec = document.getElementById('loginCredentialsSection');
+      if (credsSec) {
+        credsSec.classList.remove('hidden');
+      }
+
+      const err = document.getElementById('loginErrorMessage');
+      if (err) err.classList.add('hidden');
     }
 
     function toggleLoginPasswordVisibility() {
@@ -10263,65 +10327,63 @@ window.FULL_ERP_DATABASE = {
           currentUser = JSON.parse(saved);
           applyLoggedInUser();
         } else {
-          document.getElementById('loginScreenModal').classList.remove('hidden');
+          const modal = document.getElementById('loginScreenModal');
+          if (modal) modal.classList.remove('hidden');
           const app = document.getElementById('mainAppWrapper');
           if (app) app.classList.add('hidden');
 
-          // Always ensure pinned credentials are pre-filled
-          const creds = getSavedCredentials();
-          const uInput = document.getElementById('loginUsernameInput');
-          const pInput = document.getElementById('loginPasswordInput');
-          if (uInput) uInput.value = creds.username || 'admin';
-          if (pInput) pInput.value = creds.pass || '123456';
+          // Ensure credentials section starts hidden until role is chosen
+          const credsSec = document.getElementById('loginCredentialsSection');
+          if (credsSec) credsSec.classList.add('hidden');
         }
       } catch (e) {
-        document.getElementById('loginScreenModal').classList.remove('hidden');
+        const modal = document.getElementById('loginScreenModal');
+        if (modal) modal.classList.remove('hidden');
         const app = document.getElementById('mainAppWrapper');
         if (app) app.classList.add('hidden');
       }
     }
 
-    function setQuickLogin(username, pass, role) {
+    function handleLogin() {
       const uInput = document.getElementById('loginUsernameInput');
       const pInput = document.getElementById('loginPasswordInput');
-      if (uInput) uInput.value = username;
-      if (pInput) pInput.value = pass;
-      try {
-        localStorage.setItem('erp_saved_login_creds', JSON.stringify({ username, pass }));
-      } catch (e) {}
-      const err = document.getElementById('loginErrorMessage');
-      if (err) err.classList.add('hidden');
-    }
-
-    function handleLogin() {
-      const u = document.getElementById('loginUsernameInput').value.trim();
-      const p = document.getElementById('loginPasswordInput').value;
+      const u = uInput ? uInput.value.trim() : '';
+      const p = pInput ? pInput.value : '';
 
       if (!u) {
-        alert("يرجى كتابة اسم المستخدم!");
+        alert("يرجى اختيار أحد الحسابات أولاً (المدير العام أو المحاسب أو المندوب)!");
         return;
       }
 
-      // Verify credentials against registered system users
-      const matchedUser = systemUsers.find(user => user.username.toLowerCase() === u.toLowerCase());
+      // Check systemUsers safely
+      let matchedUser = null;
+      if (Array.isArray(systemUsers)) {
+        matchedUser = systemUsers.find(user => user.username.toLowerCase() === u.toLowerCase());
+      }
+      
       if (matchedUser) {
         if (matchedUser.pass !== p) {
-          document.getElementById('loginErrorMessage').textContent = "كلمة المرور غير صحيحة لهذا المستخدم!";
-          document.getElementById('loginErrorMessage').classList.remove('hidden');
+          const err = document.getElementById('loginErrorMessage');
+          if (err) {
+            err.textContent = "كلمة المرور غير صحيحة لهذا المستخدم!";
+            err.classList.remove('hidden');
+          }
           return;
         }
       } else {
-        // If username not yet in list, allow login if pass >= 3 and register as accountant/rep
         if (p.length < 3) {
-          document.getElementById('loginErrorMessage').textContent = "كلمة المرور يجب أن تكون 3 أحرف/أرقام على الأقل!";
-          document.getElementById('loginErrorMessage').classList.remove('hidden');
+          const err = document.getElementById('loginErrorMessage');
+          if (err) {
+            err.textContent = "كلمة المرور يجب أن تكون 3 أحرف/أرقام على الأقل!";
+            err.classList.remove('hidden');
+          }
           return;
         }
       }
 
-      let role = matchedUser ? matchedUser.role : "محاسب النظام";
+      let role = matchedUser ? matchedUser.role : (selectedUserRoleTitle || "محاسب النظام");
       if (!matchedUser) {
-        if (u.toLowerCase() === 'admin' || u === 'المدير' || u === 'يوسف') role = "المدير العام";
+        if (u.toLowerCase() === 'admin' || u === 'المدير') role = "المدير العام";
         else if (u.includes('مرضي') || u.includes('مندوب')) role = "مندوب مبيعات";
       }
 
@@ -10341,11 +10403,15 @@ window.FULL_ERP_DATABASE = {
 
     function applyLoggedInUser() {
       if (!currentUser) return;
-      document.getElementById('loginScreenModal').classList.add('hidden');
+      const modal = document.getElementById('loginScreenModal');
+      if (modal) modal.classList.add('hidden');
       const app = document.getElementById('mainAppWrapper');
       if (app) app.classList.remove('hidden');
-      document.getElementById('activeUserName').textContent = currentUser.name;
-      document.getElementById('activeUserRole').textContent = currentUser.role;
+
+      const nameEl = document.getElementById('activeUserName');
+      if (nameEl) nameEl.textContent = currentUser.name;
+      const roleEl = document.getElementById('activeUserRole');
+      if (roleEl) roleEl.textContent = currentUser.role;
 
       // Auto set sales rep in new invoice form
       const repInput = document.getElementById('invSalesRepInput');
@@ -10370,7 +10436,7 @@ window.FULL_ERP_DATABASE = {
     }
 
     function handleLogout() {
-      if (confirm("هل تريد بالتأكيد تسجيل الخروج والرجوع إلى شاشة كلمة المرور؟")) {
+      if (confirm("هل تريد بالتأكيد تسجيل الخروج والرجوع إلى شاشة اختيار المستخدم؟")) {
         try {
           sessionStorage.removeItem('erp_active_user');
         } catch (e) {}
@@ -10382,24 +10448,27 @@ window.FULL_ERP_DATABASE = {
         const adminSec = document.getElementById('section-admin');
         if (adminSec) adminSec.classList.add('hidden');
 
-        // Restore pinned credentials so user doesn't have to retype them
-        const creds = getSavedCredentials();
-        const uInput = document.getElementById('loginUsernameInput');
-        const pInput = document.getElementById('loginPasswordInput');
-        if (uInput) uInput.value = creds.username || 'admin';
-        if (pInput) pInput.value = creds.pass || '123456';
+        // Reset login screen state to clean initial view
+        const credsSec = document.getElementById('loginCredentialsSection');
+        if (credsSec) credsSec.classList.add('hidden');
+        
+        ['btnRoleAdmin', 'btnRoleAccountant', 'btnRoleRep'].forEach(id => {
+          const b = document.getElementById(id);
+          if (b) {
+            b.classList.remove('border-emerald-400', 'bg-emerald-950', 'ring-2', 'ring-emerald-400/50');
+            b.classList.add('border-emerald-800/50', 'bg-[#0f1d36]');
+          }
+        });
 
-        document.getElementById('loginErrorMessage').classList.add('hidden');
-        document.getElementById('loginScreenModal').classList.remove('hidden');
+        const err = document.getElementById('loginErrorMessage');
+        if (err) err.classList.add('hidden');
+        
+        const modal = document.getElementById('loginScreenModal');
+        if (modal) modal.classList.remove('hidden');
         const app = document.getElementById('mainAppWrapper');
         if (app) app.classList.add('hidden');
 
         switchTab('new-invoice');
-
-        setTimeout(() => {
-          const userInp = document.getElementById('loginUsernameInput');
-          if (userInp) userInp.focus();
-        }, 150);
       }
     }
 
@@ -12052,40 +12121,10 @@ window.FULL_ERP_DATABASE = {
       document.getElementById('printReceiptModal').classList.add('hidden');
     }
 
-    // Auto run
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initERP);
-    } else {
-      initERP();
-    }
-    window.addEventListener("load", initERP);
+    // (initERP moved to bottom of script)
   
     // ==================== ADMIN PANEL & SYSTEM MANAGEMENT ====================
-    let systemUsers = [
-      { username: 'admin', pass: '123456', role: 'المدير العام' },
-      { username: 'احمد', pass: '123456', role: 'محاسب النظام' },
-      { username: 'احمد مرضي', pass: '123456', role: 'مندوب مبيعات' }
-    ];
-
-    function loadSavedUsers() {
-      try {
-        const saved = localStorage.getItem('erp_system_users');
-        if (saved) {
-          systemUsers = JSON.parse(saved);
-        }
-      } catch (e) {
-        console.error("Error loading users", e);
-      }
-      renderAdminUsersTable();
-    }
-
-    function saveUsersToStorage() {
-      try {
-        localStorage.setItem('erp_system_users', JSON.stringify(systemUsers));
-      } catch (e) {
-        console.error("Error saving users", e);
-      }
-    }
+    // systemUsers is initialized at the top of the script engine
 
     function renderAdminUsersTable() {
       const tbody = document.getElementById('admUsersTableBody');
@@ -14303,7 +14342,15 @@ window.FULL_ERP_DATABASE = {
       }
     }
 
-  </script>
+  
+    // ==================== SYSTEM AUTO INITIALIZATION ====================
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initERP);
+    } else {
+      initERP();
+    }
+    window.addEventListener("load", initERP);
+</script>
 
   
 
