@@ -9043,6 +9043,9 @@ window.FULL_ERP_DATABASE = {
             <button onclick="exportTableToExcel('costCentersTableBody', 'مراكز_التكلفة_والمشاريع')" class="px-3 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
               <span>📥</span><span>تصدير Excel</span>
             </button>
+            <button onclick="shareAllCostCentersWhatsApp()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-md shadow-emerald-900/30 cursor-pointer" title="إرسال تقرير شامل لكافة المراكز عبر واتساب">
+              <span>📲</span><span>إرسال تقرير شامل واتساب</span>
+            </button>
           </div>
         </div>
 
@@ -13608,10 +13611,16 @@ window.FULL_ERP_DATABASE = {
             ${profitSign}${fin.netProfit.toLocaleString()} ج.م
           </td>
           <td class="py-3 px-4 text-center">
-            <button onclick="openCostCenterStatementModal('${c.name}', '${c.id}', '${c.supervisor || ''}')" 
-                    class="px-2.5 py-1 rounded-lg bg-blue-950 hover:bg-blue-800 text-blue-300 hover:text-white border border-blue-800/40 text-[11px] font-bold transition flex items-center justify-center gap-1 mx-auto cursor-pointer">
-              <span>🔍</span><span>كشف الحساب</span>
-            </button>
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="openCostCenterStatementModal('${c.name}', '${c.id}', '${c.supervisor || ''}')" 
+                      class="px-2.5 py-1 rounded-lg bg-blue-950 hover:bg-blue-800 text-blue-300 hover:text-white border border-blue-800/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
+                <span>🔍</span><span>كشف الحساب</span>
+              </button>
+              <button onclick="shareCostCenterDirectWhatsApp('${c.name}', '${c.id}', '${c.supervisor || ''}')" 
+                      class="px-2 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer" title="إرسال تقرير القطاع واتساب">
+                <span>📲</span>
+              </button>
+            </div>
           </td>
           <td class="py-3 px-4 text-center">
             ${c.id === '101' ? '<span class="text-[10px] text-slate-500 font-bold">الافتراضي</span>' : `
@@ -13637,6 +13646,7 @@ window.FULL_ERP_DATABASE = {
     }
 
     function openCostCenterStatementModal(centerName, centerId, supervisor) {
+      activeModalCostCenter = { centerName, centerId, supervisor };
       const modal = document.getElementById('costCenterStatementModal');
       const title = document.getElementById('statementCenterTitle');
       const subtitle = document.getElementById('statementCenterSubtitle');
@@ -13791,6 +13801,113 @@ window.FULL_ERP_DATABASE = {
       renderCostCentersTable();
     }
 
+  
+
+    // ==================== COST CENTERS WHATSAPP EXPORT LOGIC ====================
+    let activeModalCostCenter = null;
+
+    function shareCostCenterDirectWhatsApp(centerName, centerId, supervisor) {
+      const fin = getCostCenterFinancials(centerName);
+      const isProfit = fin.netProfit >= 0;
+      const profitSign = fin.netProfit > 0 ? '+' : '';
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
+      text += `🎯 *تقرير أرباح وتكاليف قطاع / مركز:*\n`;
+      text += `📍 *الاسم:* ${centerName} (كود: #${centerId})\n`;
+      text += `👤 *المشرف المسؤول:* ${supervisor || 'الإدارة العامة'}\n`;
+      text += `📅 *تاريخ التقرير:* ${today}\n`;
+      text += `--------------------------------\n`;
+      text += `📈 *إجمالي المبيعات المحققة:* ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
+      text += `📉 *إجمالي التكاليف والمصروفات:* ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
+      text += `💰 *صافي أرباح / فائض القطاع:* ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? '✅' : '⚠️'}\n`;
+      text += `--------------------------------\n`;
+      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
+      text += `👨‍💻 برمجة وتصميم / أكرم سعد - 01030108199`;
+
+      const phone = prompt("📱 أدخل رقم هاتف الواتساب للمشرف أو المدير (أو اضغط OK للمتابعة مباشرة):", "");
+      if (phone === null) return;
+      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function shareActiveCostCenterStatementWhatsApp() {
+      if (!activeModalCostCenter) return;
+      const { centerName, centerId, supervisor } = activeModalCostCenter;
+      const fin = getCostCenterFinancials(centerName);
+      const isProfit = fin.netProfit >= 0;
+      const profitSign = fin.netProfit > 0 ? '+' : '';
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
+      text += `📋 *كشف حساب تفصيلي لقطاع:* ${centerName} (#${centerId})\n`;
+      text += `👤 *المشرف:* ${supervisor || 'الإدارة العامة'} | 📅 *التاريخ:* ${today}\n`;
+      text += `--------------------------------\n`;
+      text += `📈 *إجمالي المبيعات:* ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
+      text += `📉 *إجمالي المصروفات:* ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
+      text += `💰 *صافي المركز:* ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? '✅' : '⚠️'}\n`;
+      text += `--------------------------------\n`;
+      text += `📝 *أهم العمليات الأخيرة:*\n`;
+
+      // Combine sales, payments, purchases and take top 5
+      let allItems = [];
+      fin.salesList.slice(0, 5).forEach(s => allItems.push(`▫️ فاتورة #${s.invoiceNo} لـ (${s.clientName || 'عميل'}) بـ ${(Number(s.netAmount || s.amount) || 0).toLocaleString()} ج.م`));
+      fin.paymentsList.slice(0, 5).forEach(p => allItems.push(`▫️ سند صرف #${p.paymentNo}: (${p.payeeName || p.detail}) بـ ${(Number(p.amount) || 0).toLocaleString()} ج.م`));
+      
+      text += allItems.slice(0, 8).join('\n') + '\n';
+      text += `--------------------------------\n`;
+      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
+      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
+
+      const phone = prompt("📱 أدخل رقم هاتف الواتساب لإرسال كشف الحساب (أو اضغط OK للمتابعة مباشرة):", "");
+      if (phone === null) return;
+      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function shareAllCostCentersWhatsApp() {
+      const list = getCostCentersList();
+      if (!list || list.length === 0) return;
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let grandSales = 0;
+      let grandExpenses = 0;
+      let lines = [];
+
+      list.forEach(c => {
+        const fin = getCostCenterFinancials(c.name);
+        grandSales += fin.totalSales;
+        grandExpenses += fin.totalExpenses;
+        const sign = fin.netProfit > 0 ? '+' : '';
+        lines.push(`🎯 *${c.name}* (#${c.id})\n  - مبيعات: ${fin.totalSales.toLocaleString()} ج.م\n  - مصروفات: ${fin.totalExpenses.toLocaleString()} ج.م\n  - صافي: ${sign}${fin.netProfit.toLocaleString()} ج.م`);
+      });
+
+      const grandNet = grandSales - grandExpenses;
+      const grandSign = grandNet > 0 ? '+' : '';
+
+      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
+      text += `📊 *تقرير أرباح ومصروفات كافة القطاعات والمزارع*\n`;
+      text += `📅 *تاريخ التقرير:* ${today}\n`;
+      text += `--------------------------------\n`;
+      text += `📈 *إجمالي مبيعات الشركة:* ${grandSales.toLocaleString()} ج.م\n`;
+      text += `📉 *إجمالي التكاليف والمصروفات:* ${grandExpenses.toLocaleString()} ج.م\n`;
+      text += `💰 *صافي أرباح النشاط الإجمالي:* ${grandSign}${grandNet.toLocaleString()} ج.م\n`;
+      text += `--------------------------------\n`;
+      text += `📌 *تفاصيل كل قطاع ومزرعة:*\n`;
+      text += lines.join('\n\n') + '\n';
+      text += `--------------------------------\n`;
+      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
+      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
+
+      const phone = prompt("📱 أدخل رقم هاتف الواتساب للمدير أو المحاسب (أو اضغط OK للمتابعة مباشرة):", "");
+      if (phone === null) return;
+      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
   </script>
 
   
@@ -13900,6 +14017,9 @@ window.FULL_ERP_DATABASE = {
       <div class="p-4 border-t border-blue-900/40 bg-[#060d1a] flex items-center justify-between">
         <button onclick="exportTableToExcel('statementTableBody', 'كشف_حساب_مركز_التكلفة')" class="px-3 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
           <span>📥</span><span>تصدير Excel</span>
+        </button>
+        <button onclick="shareActiveCostCenterStatementWhatsApp()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-md shadow-emerald-900/40">
+          <span>📲</span><span>إرسال كشف الحساب واتساب</span>
         </button>
         <button onclick="closeCostCenterStatementModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
           إغلاق
