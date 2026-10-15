@@ -9046,22 +9046,38 @@ window.FULL_ERP_DATABASE = {
           </div>
         </div>
 
-        <!-- Quick Info Banner -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-          <div class="bg-[#0b1528] p-3.5 rounded-xl border border-blue-900/40">
-            <div class="text-[10px] text-slate-400 font-bold mb-1">إجمالي مراكز التكلفة المعتمدة</div>
-            <div id="totalCostCentersKpi" class="text-lg font-black text-white">7 مراكز</div>
-          </div>
-          <div class="bg-[#0b1528] p-3.5 rounded-xl border border-blue-900/40">
-            <div class="text-[10px] text-slate-400 font-bold mb-1">المركز الافتراضي للعمليات السابقة</div>
-            <div class="text-sm font-bold text-emerald-400">المقر الرئيسي الإداري (101)</div>
-          </div>
-          <div class="bg-[#0b1528] p-3.5 rounded-xl border border-blue-900/40">
-            <div class="text-[10px] text-slate-400 font-bold mb-1">حالة الربط مع الفواتير واليوميات</div>
-            <div class="text-sm font-bold text-blue-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>مفعل ومتاح في كل شاشات النظام</span>
+        <!-- Financial KPI Cards for Cost Centers -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-5">
+          <div class="bg-[#0b1528] p-4 rounded-xl border border-blue-900/40 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold mb-1">إجمالي المبيعات المحققة</div>
+              <div id="ccTotalSalesKpi" class="text-base font-black text-emerald-400 dir-ltr text-right">0 ج.م</div>
             </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-300 flex items-center justify-center text-lg">📈</div>
+          </div>
+
+          <div class="bg-[#0b1528] p-4 rounded-xl border border-blue-900/40 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold mb-1">إجمالي التكاليف والمصروفات</div>
+              <div id="ccTotalExpensesKpi" class="text-base font-black text-rose-400 dir-ltr text-right">0 ج.م</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-rose-950/60 border border-rose-800/40 text-rose-300 flex items-center justify-center text-lg">📉</div>
+          </div>
+
+          <div class="bg-[#0b1528] p-4 rounded-xl border border-blue-900/40 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold mb-1">صافي أرباح / فائض النشاط</div>
+              <div id="ccNetProfitKpi" class="text-base font-black text-white dir-ltr text-right">0 ج.م</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-950/60 border border-blue-800/40 text-blue-300 flex items-center justify-center text-lg">💰</div>
+          </div>
+
+          <div class="bg-[#0b1528] p-4 rounded-xl border border-blue-900/40 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold mb-1">المراكز والمشاريع المعتمدة</div>
+              <div id="totalCostCentersKpi" class="text-base font-black text-white">7 مراكز</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-purple-950/60 border border-purple-800/40 text-purple-300 flex items-center justify-center text-lg">🎯</div>
           </div>
         </div>
 
@@ -9078,11 +9094,12 @@ window.FULL_ERP_DATABASE = {
               <tr>
                 <th class="py-3 px-4">كود المركز</th>
                 <th class="py-3 px-4">اسم المزرعة / مركز التكلفة</th>
-                <th class="py-3 px-4">نوع المركز</th>
-                <th class="py-3 px-4">المشرف / المهندس المسؤول</th>
-                <th class="py-3 px-4">الحالة</th>
-                <th class="py-3 px-4">ملاحظات وبيان</th>
-                <th class="py-3 px-4 text-center">إجراءات</th>
+                <th class="py-3 px-4">المشرف المسؤول</th>
+                <th class="py-3 px-4 text-right">إجمالي المبيعات</th>
+                <th class="py-3 px-4 text-right">المصروفات والتكاليف</th>
+                <th class="py-3 px-4 text-right">صافي الربح / الفائض</th>
+                <th class="py-3 px-4 text-center">كشف الحساب والعمليات</th>
+                <th class="py-3 px-4 text-center">حذف</th>
               </tr>
             </thead>
             <tbody id="costCentersTableBody" class="divide-y divide-blue-900/20">
@@ -13524,40 +13541,191 @@ window.FULL_ERP_DATABASE = {
       });
     }
 
+    function getCostCenterFinancials(centerName) {
+      const sales = (db.salesInvoices || []).filter(inv => (inv.costCenter || 'المقر الرئيسي الإداري') === centerName);
+      const totalSales = sales.reduce((sum, inv) => sum + (parseFloat(inv.netAmount || inv.amount) || 0), 0);
+
+      const payments = (db.cashPayments || []).filter(p => (p.costCenter || 'المقر الرئيسي الإداري') === centerName);
+      const totalPayments = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+      const purchases = (db.purchaseInvoices || []).filter(pur => (pur.costCenter || pur.branch || 'المقر الرئيسي الإداري') === centerName);
+      const totalPurchases = purchases.reduce((sum, pur) => sum + (parseFloat(pur.amount) || 0), 0);
+
+      const totalExpenses = totalPayments + totalPurchases;
+      const netProfit = totalSales - totalExpenses;
+
+      return {
+        salesCount: sales.length,
+        totalSales,
+        paymentsCount: payments.length,
+        purchasesCount: purchases.length,
+        totalExpenses,
+        netProfit,
+        salesList: sales,
+        paymentsList: payments,
+        purchasesList: purchases
+      };
+    }
+
     function renderCostCentersTable(centers) {
       const tbody = document.getElementById('costCentersTableBody');
       if (!tbody) return;
       const list = centers || getCostCentersList();
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-500 text-xs">لا توجد مراكز تكلفة مسجلة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-500 text-xs">لا توجد مراكز تكلفة مسجلة</td></tr>';
         return;
       }
 
+      let grandSales = 0;
+      let grandExpenses = 0;
+
       tbody.innerHTML = list.map((c, idx) => {
-        let typeBadge = 'bg-blue-950 text-blue-300 border-blue-800/40';
-        if (c.type.includes('مزرعة')) typeBadge = 'bg-emerald-950 text-emerald-300 border-emerald-800/40';
-        else if (c.type.includes('إنتاج')) typeBadge = 'bg-cyan-950 text-cyan-300 border-cyan-800/40';
-        else if (c.type.includes('نقل')) typeBadge = 'bg-amber-950 text-amber-300 border-amber-800/40';
+        const fin = getCostCenterFinancials(c.name);
+        grandSales += fin.totalSales;
+        grandExpenses += fin.totalExpenses;
+
+        const isProfit = fin.netProfit >= 0;
+        const profitClass = isProfit ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+        const profitSign = fin.netProfit > 0 ? '+' : '';
 
         return `
         <tr class="${idx % 2 === 1 ? 'bg-[#0d182e]' : 'bg-[#0f1d36]'} hover:bg-blue-900/30 transition">
-          <td class="py-2.5 px-4 font-mono font-bold text-blue-400 text-xs">${c.id}</td>
-          <td class="py-2.5 px-4 font-bold text-white text-xs">${c.name}</td>
-          <td class="py-2.5 px-4">
-            <span class="px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeBadge}">${c.type}</span>
+          <td class="py-3 px-4 font-mono font-bold text-blue-400 text-xs">${c.id}</td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-white text-xs">${c.name}</div>
+            <div class="text-[10px] text-slate-400">${c.type}</div>
           </td>
-          <td class="py-2.5 px-4 text-slate-300 text-xs">${c.supervisor || '-'}</td>
-          <td class="py-2.5 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40">${c.status || 'نشط'}</span>
+          <td class="py-3 px-4 text-slate-300 text-xs">${c.supervisor || '-'}</td>
+          <td class="py-3 px-4 text-right font-bold text-emerald-400 dir-ltr text-xs">
+            ${fin.totalSales.toLocaleString()} ج.م
+            <div class="text-[9px] text-slate-400 font-normal">(${fin.salesCount} فاتورة)</div>
           </td>
-          <td class="py-2.5 px-4 text-slate-400 text-[11px] max-w-[200px] truncate" title="${c.notes || ''}">${c.notes || '-'}</td>
-          <td class="py-2.5 px-4 text-center">
+          <td class="py-3 px-4 text-right font-bold text-rose-400 dir-ltr text-xs">
+            ${fin.totalExpenses.toLocaleString()} ج.م
+            <div class="text-[9px] text-slate-400 font-normal">(${fin.paymentsCount + fin.purchasesCount} حركة)</div>
+          </td>
+          <td class="py-3 px-4 text-right ${profitClass} dir-ltr text-xs text-nowrap">
+            ${profitSign}${fin.netProfit.toLocaleString()} ج.م
+          </td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="openCostCenterStatementModal('${c.name}', '${c.id}', '${c.supervisor || ''}')" 
+                    class="px-2.5 py-1 rounded-lg bg-blue-950 hover:bg-blue-800 text-blue-300 hover:text-white border border-blue-800/40 text-[11px] font-bold transition flex items-center justify-center gap-1 mx-auto cursor-pointer">
+              <span>🔍</span><span>كشف الحساب</span>
+            </button>
+          </td>
+          <td class="py-3 px-4 text-center">
             ${c.id === '101' ? '<span class="text-[10px] text-slate-500 font-bold">الافتراضي</span>' : `
             <button onclick="deleteCostCenter('${c.id}')" class="text-rose-400 hover:text-rose-300 p-1 transition" title="حذف المركز">🗑️</button>
             `}
           </td>
         </tr>
       `}).join('');
+
+      // Update Top KPI cards
+      const kpiSales = document.getElementById('ccTotalSalesKpi');
+      if (kpiSales) kpiSales.textContent = `${grandSales.toLocaleString()} ج.م`;
+
+      const kpiExp = document.getElementById('ccTotalExpensesKpi');
+      if (kpiExp) kpiExp.textContent = `${grandExpenses.toLocaleString()} ج.م`;
+
+      const kpiNet = document.getElementById('ccNetProfitKpi');
+      if (kpiNet) {
+        const grandNet = grandSales - grandExpenses;
+        kpiNet.textContent = `${grandNet > 0 ? '+' : ''}${grandNet.toLocaleString()} ج.م`;
+        kpiNet.className = `text-base font-black dir-ltr text-right ${grandNet >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      }
+    }
+
+    function openCostCenterStatementModal(centerName, centerId, supervisor) {
+      const modal = document.getElementById('costCenterStatementModal');
+      const title = document.getElementById('statementCenterTitle');
+      const subtitle = document.getElementById('statementCenterSubtitle');
+      const tbody = document.getElementById('statementTableBody');
+      if (!modal || !title || !tbody) return;
+
+      title.textContent = `كشف حساب تحليلي: [${centerId} - ${centerName}]`;
+      subtitle.textContent = `المشرف المسؤول: ${supervisor || 'الإدارة العامة'} | سجل الحركات التفصيلية الخاصة بالمركز`;
+
+      const fin = getCostCenterFinancials(centerName);
+
+      document.getElementById('statementSalesSum').textContent = `${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)`;
+      document.getElementById('statementExpensesSum').textContent = `${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)`;
+      const netEl = document.getElementById('statementNetSum');
+      netEl.textContent = `${fin.netProfit > 0 ? '+' : ''}${fin.netProfit.toLocaleString()} ج.م`;
+      netEl.className = `text-sm font-black dir-ltr text-right ${fin.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      let rows = [];
+
+      // Sales Invoices
+      fin.salesList.forEach(inv => {
+        rows.push({
+          type: 'فاتورة مبيعات',
+          typeClass: 'bg-emerald-950 text-emerald-300 border-emerald-800/40',
+          no: `فاتورة #${inv.invoiceNo}`,
+          date: (inv.date || '').replace('T', ' '),
+          party: inv.clientName || 'عميل نقدي',
+          amount: parseFloat(inv.netAmount || inv.amount) || 0,
+          isCredit: true,
+          user: inv.rep || inv.user || 'المسؤول'
+        });
+      });
+
+      // Payments
+      fin.paymentsList.forEach(p => {
+        rows.push({
+          type: 'سند صرف',
+          typeClass: 'bg-rose-950 text-rose-300 border-rose-800/40',
+          no: `سند #${p.paymentNo}`,
+          date: (p.date || '').replace('T', ' '),
+          party: p.payeeName || p.detail || 'مصروف عام',
+          amount: parseFloat(p.amount) || 0,
+          isCredit: false,
+          user: p.user || 'المسؤول'
+        });
+      });
+
+      // Purchases
+      fin.purchasesList.forEach(pur => {
+        rows.push({
+          type: 'فاتورة مشتريات',
+          typeClass: 'bg-amber-950 text-amber-300 border-amber-800/40',
+          no: `مشتريات #${pur.invoiceNo || pur.entryId}`,
+          date: (pur.date || '').replace('T', ' '),
+          party: pur.supplierName || pur.detail || 'مشتريات بضاعة',
+          amount: parseFloat(pur.amount) || 0,
+          isCredit: false,
+          user: pur.user || 'المسؤول'
+        });
+      });
+
+      // Sort by date descending
+      rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500 text-xs">لا توجد حركات مسجلة لهذا المركز حتى الآن</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map((r, idx) => `
+          <tr class="${idx % 2 === 1 ? 'bg-[#0d182e]' : 'bg-[#0f1d36]'} hover:bg-blue-900/30 transition">
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded-full border text-[10px] font-semibold ${r.typeClass}">${r.type}</span>
+            </td>
+            <td class="py-2.5 px-3 font-mono font-bold text-white text-xs">${r.no}</td>
+            <td class="py-2.5 px-3 text-slate-400 font-mono text-xs">${r.date}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-200 text-xs">${r.party}</td>
+            <td class="py-2.5 px-3 text-right font-bold dir-ltr text-xs ${r.isCredit ? 'text-emerald-400' : 'text-rose-400'}">
+              ${r.isCredit ? '+' : '-'}${r.amount.toLocaleString()} ج.م
+            </td>
+            <td class="py-2.5 px-3 text-slate-400 text-xs">${r.user}</td>
+          </tr>
+        `).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCostCenterStatementModal() {
+      const modal = document.getElementById('costCenterStatementModal');
+      if (modal) modal.classList.add('hidden');
     }
 
     function filterCostCenters() {
@@ -13671,6 +13839,73 @@ window.FULL_ERP_DATABASE = {
           <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold shadow-md shadow-emerald-900/40 transition">حفظ المركز</button>
         </div>
       </form>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL: COST CENTER STATEMENT & TRANSACTIONS ==================== -->
+  <div id="costCenterStatementModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-[#0f1d36] border border-blue-900/60 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-blue-900/40 flex items-center justify-between bg-[#060d1a]/80">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-300 flex items-center justify-center text-lg">📊</div>
+          <div>
+            <h3 class="font-extrabold text-white text-base" id="statementCenterTitle">كشف حساب مركز التكلفة</h3>
+            <p class="text-xs text-slate-400 mt-0.5" id="statementCenterSubtitle">سجل تفصيلي لكافة المبيعات وسندات الصرف والمشتريات المحملة على هذا القطاع</p>
+          </div>
+        </div>
+        <button onclick="closeCostCenterStatementModal()" class="text-slate-400 hover:text-white p-1 text-lg">✕</button>
+      </div>
+
+      <!-- Financial Summary Mini Bar Inside Modal -->
+      <div class="grid grid-cols-3 gap-3 p-4 bg-[#0a1426] border-b border-blue-900/30 text-xs">
+        <div class="p-2.5 rounded-xl bg-[#0f1d36] border border-blue-900/40">
+          <div class="text-[10px] text-slate-400 font-bold mb-0.5">إجمالي المبيعات</div>
+          <div id="statementSalesSum" class="text-sm font-bold text-emerald-400 dir-ltr text-right">0 ج.م</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-[#0f1d36] border border-blue-900/40">
+          <div class="text-[10px] text-slate-400 font-bold mb-0.5">إجمالي المصروفات والتكاليف</div>
+          <div id="statementExpensesSum" class="text-sm font-bold text-rose-400 dir-ltr text-right">0 ج.م</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-[#0f1d36] border border-blue-900/40">
+          <div class="text-[10px] text-slate-400 font-bold mb-0.5">صافي ربحية هذا القطاع</div>
+          <div id="statementNetSum" class="text-sm font-black text-white dir-ltr text-right">0 ج.م</div>
+        </div>
+      </div>
+
+      <!-- Scrollable Transactions Table -->
+      <div class="p-4 flex-1 overflow-y-auto">
+        <div class="rounded-xl border border-blue-900/40 overflow-hidden">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-[#060d1a] text-blue-200 font-bold border-b border-blue-900/40 sticky top-0">
+              <tr>
+                <th class="py-2.5 px-3">نوع الحركة</th>
+                <th class="py-2.5 px-3">رقم الحركة</th>
+                <th class="py-2.5 px-3">التاريخ</th>
+                <th class="py-2.5 px-3">الطرف الثاني / البيان</th>
+                <th class="py-2.5 px-3 text-right">المبلغ</th>
+                <th class="py-2.5 px-3">المستخدم</th>
+              </tr>
+            </thead>
+            <tbody id="statementTableBody" class="divide-y divide-blue-900/20 bg-[#0f1d36]">
+              <!-- Filled dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-blue-900/40 bg-[#060d1a] flex items-center justify-between">
+        <button onclick="exportTableToExcel('statementTableBody', 'كشف_حساب_مركز_التكلفة')" class="px-3 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
+          <span>📥</span><span>تصدير Excel</span>
+        </button>
+        <button onclick="closeCostCenterStatementModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          إغلاق
+        </button>
+      </div>
+
     </div>
   </div>
 
