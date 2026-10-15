@@ -8096,13 +8096,13 @@ window.FULL_ERP_DATABASE = {
             <span>👤</span>
             <span>اختر المستخدم للدخول إلى النظام:</span>
           </span>
-          <span class="text-[10px] text-emerald-400 font-normal">اضغط على الحساب المطلوب</span>
+          <span class="text-[10px] text-emerald-400 font-normal">اضغط لاختيار الحساب</span>
         </div>
 
         <div class="grid grid-cols-3 gap-2.5">
-          <!-- Role 1: المدير العام -->
+          <!-- Role 1: المدير العام (Active by Default) -->
           <button type="button" id="btnRoleAdmin" onclick="selectLoginRole('admin', '123456', 'المدير العام')" 
-                  class="bg-[#0f1d36] hover:bg-emerald-950/80 border-2 border-emerald-800/50 hover:border-emerald-500 text-emerald-300 py-3 px-1.5 rounded-2xl font-bold transition-all text-center cursor-pointer shadow-md active:scale-95 flex flex-col items-center gap-1">
+                  class="border-2 border-emerald-400 bg-emerald-950 ring-2 ring-emerald-400/50 text-emerald-300 py-3 px-1.5 rounded-2xl font-bold transition-all text-center cursor-pointer shadow-md active:scale-95 flex flex-col items-center gap-1">
             <span class="text-2xl">👑</span>
             <span class="text-xs text-white">المدير العام</span>
             <span class="text-[10px] text-emerald-400 font-mono">admin</span>
@@ -8127,17 +8127,17 @@ window.FULL_ERP_DATABASE = {
       </div>
 
       <!-- Hidden input for active selected user -->
-      <input type="hidden" id="loginUsernameInput" value="">
+      <input type="hidden" id="loginUsernameInput" value="admin">
       
-      <!-- Step 2: Credentials and Login Button (HIDDEN INITIALLY - APPEARS ONLY UPON SELECTING A ROLE!) -->
-      <div id="loginCredentialsSection" class="hidden transition-all duration-300 mt-5 pt-4 border-t border-emerald-900/50 space-y-4">
+      <!-- Step 2: Credentials and Login Button (Visible with pre-selected Admin, dynamically updates on role change) -->
+      <div id="loginCredentialsSection" class="transition-all duration-300 mt-5 pt-4 border-t border-emerald-900/50 space-y-4">
         <!-- Selected Role Indicator Pill -->
         <div class="bg-emerald-950/70 border border-emerald-500/40 rounded-xl p-2.5 flex items-center justify-between text-xs shadow-inner">
           <div class="flex items-center gap-2">
             <span class="text-emerald-400 font-bold">الحساب المختار:</span>
-            <span id="selectedRoleBadge" class="bg-emerald-500/20 text-white px-2 py-0.5 rounded-md font-bold text-xs border border-emerald-400/30">المدير العام (admin)</span>
+            <span id="selectedRoleBadge" class="bg-emerald-500/20 text-white px-2 py-0.5 rounded-md font-bold text-xs border border-emerald-400/30">👑 المدير العام (admin)</span>
           </div>
-          <span class="text-[10px] text-emerald-300 font-mono">جاهز للدخول</span>
+          <span class="text-[10px] text-emerald-300 font-mono">جاهز للدخول ⚡</span>
         </div>
 
         <!-- Password Input -->
@@ -8163,7 +8163,7 @@ window.FULL_ERP_DATABASE = {
         <button type="button" id="loginSubmitBtn" onclick="handleLogin()" 
                 class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-700/40 transition text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
           <span class="text-base">🔐</span>
-          <span id="loginSubmitBtnText">تسجيل الدخول إلى النظام الآن 🚀</span>
+          <span id="loginSubmitBtnText">تسجيل الدخول إلى النظام (دخول كـ المدير العام) 🚀</span>
         </button>
       </div>
 
@@ -10332,9 +10332,7 @@ window.FULL_ERP_DATABASE = {
           const app = document.getElementById('mainAppWrapper');
           if (app) app.classList.add('hidden');
 
-          // Ensure credentials section starts hidden until role is chosen
-          const credsSec = document.getElementById('loginCredentialsSection');
-          if (credsSec) credsSec.classList.add('hidden');
+          selectLoginRole('admin', '123456', 'المدير العام');
         }
       } catch (e) {
         const modal = document.getElementById('loginScreenModal');
@@ -14325,11 +14323,7 @@ window.FULL_ERP_DATABASE = {
             نظام جرين رايت ERP السحابي | تصميم وبرمجة / أكرم سعد - 01030108199
           </div>
 
-          <script>
-            window.onload = function() {
-              window.print();
-            };
-          </script>
+
         </body>
         </html>
       `;
