@@ -13187,6 +13187,104 @@ window.FULL_ERP_DATABASE = {
     let activeModalReceipt = null;
     let activeModalStatementClientId = null;
 
+    
+    // ==================== UNIFIED WHATSAPP SHARE ENGINE ====================
+    function openWhatsAppModal(title, subtitle, text, defaultPhone = '') {
+      const modal = document.getElementById('whatsappShareModal');
+      const titleEl = document.getElementById('waModalTitle');
+      const subtitleEl = document.getElementById('waModalSubtitle');
+      const previewEl = document.getElementById('waMessagePreview');
+      const phoneEl = document.getElementById('waRecipientPhone');
+      if (!modal || !previewEl) return;
+
+      if (titleEl) titleEl.textContent = title || "إرسال التقرير عبر واتساب";
+      if (subtitleEl) subtitleEl.textContent = subtitle || "إرسال مباشر إلى محادثة واتساب أو نسخ النص";
+      previewEl.value = text || "";
+      if (phoneEl) phoneEl.value = defaultPhone || "";
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeWhatsAppModal() {
+      const modal = document.getElementById('whatsappShareModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function executeWhatsAppSend() {
+      const phoneInput = document.getElementById('waRecipientPhone');
+      const previewInput = document.getElementById('waMessagePreview');
+      const phone = phoneInput ? phoneInput.value.trim() : '';
+      const text = previewInput ? previewInput.value.trim() : '';
+      if (!text) {
+        alert("لا يوجد نص للإرسال!");
+        return;
+      }
+
+      let cleanPhone = phone.replace(/[^0-9]/g, '');
+      if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
+        cleanPhone = '2' + cleanPhone; // Egypt format (01030108199 -> 201030108199)
+      } else if (cleanPhone && !cleanPhone.startsWith('2') && cleanPhone.length === 10) {
+        cleanPhone = '20' + cleanPhone;
+      }
+
+      let url = '';
+      if (cleanPhone) {
+        url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
+      } else {
+        url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      }
+
+      // Safe trigger without popup blocker
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try { document.body.removeChild(a); } catch (e) {}
+      }, 300);
+
+      closeWhatsAppModal();
+    }
+
+    function copyWhatsAppMessageToClipboard() {
+      const preview = document.getElementById('waMessagePreview');
+      if (!preview) return;
+      
+      const text = preview.value;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showCopySuccess();
+        }).catch(() => {
+          fallbackCopyText(preview);
+        });
+      } else {
+        fallbackCopyText(preview);
+      }
+    }
+
+    function fallbackCopyText(el) {
+      el.select();
+      try {
+        document.execCommand('copy');
+        showCopySuccess();
+      } catch (err) {
+        alert("تم نسخ النص! يمكنك لصقه الآن في واتساب.");
+      }
+    }
+
+    function showCopySuccess() {
+      const btn = document.getElementById('copyWaBtn');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✅</span><span class="text-white">تم النسخ بنجاح!</span>';
+        setTimeout(() => { btn.innerHTML = orig; }, 2500);
+      } else {
+        alert("✅ تم نسخ التقرير إلى الحافظة بنجاح!");
+      }
+    }
+
     // 1. WhatsApp Share Handlers
     function shareInvoiceViaWhatsApp(inv) {
       if (!inv) return;
@@ -13195,10 +13293,9 @@ window.FULL_ERP_DATABASE = {
 
       const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n📄 *فاتورة مبيعات رقم:* #${inv.invoiceNo}\n📅 *التاريخ:* ${(inv.date || '').slice(0, 10)}\n👤 *العميل المحترم:* ${inv.clientName || 'عميل'}\n----------------------------------\n📦 *تفاصيل الفاتورة:*\n${itemsText}\n----------------------------------\n💰 *إجمالي الفاتورة:* ${(Number(inv.netAmount || inv.amount) || 0).toLocaleString()} ج.م\n💵 *المدفوع نقداً:* ${(Number(inv.paidCash) || 0).toLocaleString()} ج.م\n📌 *المتبقي من الفاتورة:* ${(Number(inv.finalRemaining) || 0).toLocaleString()} ج.م\n👤 *المندوب المسؤول:* ${inv.rep || inv.user || 'جرين رايت'}\n\n🤝 *شكراً لتعاملكم الراقي معنا، مع تمنياتنا بموسم زراعي مبارك ومثمر.*`;
 
-      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
-      const cleanPhone = phone.replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      const client = (db.clients || []).find(c => String(c.id) === String(inv.clientId));
+      const defaultPhone = client ? (client.phone || '') : '';
+      openWhatsAppModal(`فاتورة مبيعات #${inv.invoiceNo}`, `إرسال الفاتورة للعميل: ${inv.clientName || ''}`, text, defaultPhone);
     }
 
     function shareActiveInvoiceWhatsApp() {
@@ -13209,10 +13306,9 @@ window.FULL_ERP_DATABASE = {
       if (!r) return;
       const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n🧾 *سند قبض نقدي رقم:* #${r.receiptNo}\n📅 *التاريخ:* ${(r.date || '').slice(0, 10)}\n👤 *استلمنا من السيد:* ${r.clientName}\n💰 *مبلغ وقدره:* ${(Number(r.amount) || 0).toLocaleString()} ج.م\n📝 *البيان:* ${r.detail || 'دفعة واصلة تحت الحساب'}\n🏦 *الخزينة المستلمة:* ${r.treasuryName}\n\n🤝 *تم قيد المبلغ في حسابكم بنجاح، شكراً لتعاملكم الدائم.*`;
 
-      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
-      const cleanPhone = phone.replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      const client = (db.clients || []).find(c => String(c.id) === String(r.clientId));
+      const defaultPhone = client ? (client.phone || '') : '';
+      openWhatsAppModal(`سند قبض نقدي #${r.receiptNo}`, `إرسال إيصال الاستلام للعميل: ${r.clientName || ''}`, text, defaultPhone);
     }
 
     function shareActiveReceiptWhatsApp() {
@@ -13230,10 +13326,7 @@ window.FULL_ERP_DATABASE = {
 
       const text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n📊 *كشف حساب العميل المحترم:* ${client.name}\n🔢 *كود الحساب:* #${client.id}\n📅 *تاريخ التقرير:* ${new Date().toLocaleDateString('ar-EG')}\n----------------------------------\n📌 *رصيد أول المدة:* ${openBal.toLocaleString()} ج.م\n🛒 *إجمالي المسحوبات (المبيعات):* ${totalSales.toLocaleString()} ج.م\n💳 *إجمالي المدفوعات (التحصيلات):* ${totalReceipts.toLocaleString()} ج.م\n----------------------------------\n⚖️ *صافي الرصيد الحالي:* ${bal.toLocaleString()} ج.م (${bal > 0 ? 'متبقي عليكم' : 'رصيد دائن'})\n\n🤝 *شاكرين تعاونكم الدائم معنا.*`;
 
-      const phone = prompt("أدخل رقم هاتف العميل (واتساب):", "") || "";
-      const cleanPhone = phone.replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      openWhatsAppModal(`كشف حساب: ${client.name}`, `إرسال كشف الحساب والمديونية`, text, client.phone || '');
     }
 
     function shareActiveStatementWhatsApp() {
@@ -13825,11 +13918,83 @@ window.FULL_ERP_DATABASE = {
       text += `✨ *نظام جرين رايت ERP السحابي*\n`;
       text += `👨‍💻 برمجة وتصميم / أكرم سعد - 01030108199`;
 
-      const phone = prompt("📱 أدخل رقم هاتف الواتساب للمشرف أو المدير (أو اضغط OK للمتابعة مباشرة):", "");
-      if (phone === null) return;
-      const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
-      const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      openWhatsAppModal(`تقرير مركز: ${centerName}`, `إرسال تقرير الأرباح والتكاليف للمشرف أو المدير`, text);
+    }
+
+    function shareActiveCostCenterStatementWhatsApp() {
+      if (!activeModalCostCenter) {
+        alert("يرجى اختيار مركز التكلفة أولاً!");
+        return;
+      }
+      const { centerName, centerId, supervisor } = activeModalCostCenter;
+      const fin = getCostCenterFinancials(centerName);
+      const isProfit = fin.netProfit >= 0;
+      const profitSign = fin.netProfit > 0 ? '+' : '';
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let text = `*شركة جرين رايت للاستثمار الزراعي*\n`;
+      text += `*كشف حساب تحليلي رسمي*\n`;
+      text += `المركز: *${centerName}* (#${centerId})\n`;
+      text += `المشرف: *${supervisor || 'الإدارة العامة'}*\n`;
+      text += `التاريخ: ${today}\n`;
+      text += `==============================\n`;
+      text += `المبيعات   : ${fin.totalSales.toLocaleString()} ج.م (${fin.salesCount} فاتورة)\n`;
+      text += `المصروفات : ${fin.totalExpenses.toLocaleString()} ج.م (${fin.paymentsCount + fin.purchasesCount} حركة)\n`;
+      text += `صافي الربح : ${profitSign}${fin.netProfit.toLocaleString()} ج.م ${isProfit ? ' [رابح]' : ' [عجز]'}\n`;
+      text += `==============================\n`;
+      text += `*أهم العمليات الأخيرة:*\n`;
+
+      let allItems = [];
+      fin.salesList.slice(0, 5).forEach(s => allItems.push(`- فاتورة #${s.invoiceNo} لـ (${s.clientName || 'عميل'}): ${(Number(s.netAmount || s.amount) || 0).toLocaleString()} ج.م`));
+      fin.paymentsList.slice(0, 5).forEach(p => allItems.push(`- صرف #${p.paymentNo} (${p.payeeName || p.detail}): ${(Number(p.amount) || 0).toLocaleString()} ج.م`));
+      
+      if (allItems.length > 0) {
+        text += allItems.slice(0, 8).join('\n') + '\n';
+      } else {
+        text += `- لا توجد حركات مسجلة لهذا المركز حتى الآن\n`;
+      }
+      text += `==============================\n`;
+      text += `نظام جرين رايت ERP السحابي\n`;
+      text += `تصميم وبرمجة / أكرم سعد - 01030108199`;
+
+      openWhatsAppModal(`كشف حساب: ${centerName}`, `إرسال كشف الحساب والعمليات التفصيلية عبر واتساب`, text);
+    }
+
+    function shareAllCostCentersWhatsApp() {
+      const list = getCostCentersList();
+      if (!list || list.length === 0) return;
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      let grandSales = 0;
+      let grandExpenses = 0;
+      let lines = [];
+
+      list.forEach(c => {
+        const fin = getCostCenterFinancials(c.name);
+        grandSales += fin.totalSales;
+        grandExpenses += fin.totalExpenses;
+        const sign = fin.netProfit > 0 ? '+' : '';
+        lines.push(`🎯 *${c.name}* (#${c.id})\n  - مبيعات: ${fin.totalSales.toLocaleString()} ج.م\n  - مصروفات: ${fin.totalExpenses.toLocaleString()} ج.م\n  - صافي: ${sign}${fin.netProfit.toLocaleString()} ج.م`);
+      });
+
+      const grandNet = grandSales - grandExpenses;
+      const grandSign = grandNet > 0 ? '+' : '';
+
+      let text = `🌿 *شركة جرين رايت للاستثمار الزراعي* 🌿\n`;
+      text += `📊 *تقرير أرباح ومصروفات كافة القطاعات والمزارع*\n`;
+      text += `📅 *تاريخ التقرير:* ${today}\n`;
+      text += `--------------------------------\n`;
+      text += `📈 *إجمالي مبيعات الشركة:* ${grandSales.toLocaleString()} ج.م\n`;
+      text += `📉 *إجمالي التكاليف والمصروفات:* ${grandExpenses.toLocaleString()} ج.م\n`;
+      text += `💰 *صافي أرباح النشاط الإجمالي:* ${grandSign}${grandNet.toLocaleString()} ج.م\n`;
+      text += `--------------------------------\n`;
+      text += `📌 *تفاصيل كل قطاع ومزرعة:*\n`;
+      text += lines.join('\n\n') + '\n';
+      text += `--------------------------------\n`;
+      text += `✨ *نظام جرين رايت ERP السحابي*\n`;
+      text += `👨‍💻 تصميم وبرمجة / أكرم سعد - 01030108199`;
+
+      openWhatsAppModal(`تقرير مراكز التكلفة الشامل`, `إرسال التقرير المالي التنفيذي العام للشركة عبر واتساب`, text);
     }
 
     function shareActiveCostCenterStatementWhatsApp() {
@@ -13906,6 +14071,164 @@ window.FULL_ERP_DATABASE = {
       const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
       const url = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone : '0' + cleanPhone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
+    }
+
+  
+
+    // ==================== COST CENTER PRINT / PDF ENGINE ====================
+    function printCostCenterStatement() {
+      if (!activeModalCostCenter) return;
+      const { centerName, centerId, supervisor } = activeModalCostCenter;
+      const fin = getCostCenterFinancials(centerName);
+      const isProfit = fin.netProfit >= 0;
+      const profitSign = fin.netProfit > 0 ? '+' : '';
+      const today = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Gather transactions
+      let rows = [];
+      fin.salesList.forEach(inv => {
+        rows.push({
+          type: 'فاتورة مبيعات',
+          no: `فاتورة #${inv.invoiceNo}`,
+          date: (inv.date || '').replace('T', ' '),
+          party: inv.clientName || 'عميل نقدي',
+          amount: parseFloat(inv.netAmount || inv.amount) || 0,
+          isCredit: true,
+          user: inv.rep || inv.user || 'المسؤول'
+        });
+      });
+      fin.paymentsList.forEach(p => {
+        rows.push({
+          type: 'سند صرف',
+          no: `سند #${p.paymentNo}`,
+          date: (p.date || '').replace('T', ' '),
+          party: p.payeeName || p.detail || 'مصروف عام',
+          amount: parseFloat(p.amount) || 0,
+          isCredit: false,
+          user: p.user || 'المسؤول'
+        });
+      });
+      fin.purchasesList.forEach(pur => {
+        rows.push({
+          type: 'فاتورة مشتريات',
+          no: `مشتريات #${pur.invoiceNo || pur.entryId}`,
+          date: (pur.date || '').replace('T', ' '),
+          party: pur.supplierName || pur.detail || 'مشتريات بضاعة',
+          amount: parseFloat(pur.amount) || 0,
+          isCredit: false,
+          user: pur.user || 'المسؤول'
+        });
+      });
+      rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      const rowsHtml = rows.map((r, i) => `
+        <tr style="background: ${i % 2 === 1 ? '#f8fafc' : '#ffffff'}; border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px 12px; font-weight: bold; color: ${r.isCredit ? '#047857' : '#b91c1c'};">${r.type}</td>
+          <td style="padding: 8px 12px; font-family: monospace;">${r.no}</td>
+          <td style="padding: 8px 12px; font-family: monospace; color: #64748b;">${r.date}</td>
+          <td style="padding: 8px 12px;">${r.party}</td>
+          <td style="padding: 8px 12px; text-align: left; font-weight: bold; color: ${r.isCredit ? '#047857' : '#b91c1c'}; font-family: monospace;">
+            ${r.isCredit ? '+' : '-'}${r.amount.toLocaleString()} ج.م
+          </td>
+          <td style="padding: 8px 12px; color: #64748b;">${r.user}</td>
+        </tr>
+      `).join('');
+
+      const printHtml = `
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="utf-8">
+          <title>كشف حساب رسمي - ${centerName}</title>
+          <style>
+            @page { size: A4 portrait; margin: 15mm; }
+            body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+            .logo { height: 60px; object-contain; }
+            .company-name { font-size: 20px; font-weight: 900; color: #0369a1; margin-bottom: 3px; }
+            .company-sub { font-size: 12px; color: #64748b; font-weight: 600; }
+            .title-box { text-align: center; background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
+            .title-box h2 { margin: 0; font-size: 16px; color: #0369a1; }
+            .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+            .meta-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center; }
+            .meta-card .val { font-size: 15px; font-weight: 800; margin-top: 4px; font-family: monospace; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+            th { background: #0f172a; color: #ffffff; padding: 10px 12px; text-align: right; font-size: 12px; }
+            .signatures { display: flex; justify-content: space-between; margin-top: 40px; padding: 0 40px; font-weight: bold; }
+            @media print {
+              .no-print { display: none !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="company-name">جرين رايت للاستثمار الزراعي</div>
+              <div class="company-sub">منظومة الإدارة المتكاملة والمحاسبة العامة</div>
+            </div>
+            <img src="green-wright-logo.png" class="logo" alt="جرين رايت" onerror="this.style.display='none'">
+          </div>
+
+          <div class="title-box">
+            <h2>كشف حساب تحليلي رسمي: ${centerName} (كود: #${centerId})</h2>
+            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">المشرف المسؤول: <b>${supervisor || 'الإدارة العامة'}</b> | تاريخ الإصدار: <b>${today}</b></div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-card">
+              <div style="color: #64748b; font-size: 11px;">إجمالي المبيعات المحققة</div>
+              <div class="val" style="color: #047857;">${fin.totalSales.toLocaleString()} ج.م</div>
+            </div>
+            <div class="meta-card">
+              <div style="color: #64748b; font-size: 11px;">إجمالي المصروفات والتكاليف</div>
+              <div class="val" style="color: #b91c1c;">${fin.totalExpenses.toLocaleString()} ج.م</div>
+            </div>
+            <div class="meta-card">
+              <div style="color: #64748b; font-size: 11px;">صافي أرباح / فائض القطاع</div>
+              <div class="val" style="color: ${isProfit ? '#047857' : '#b91c1c'};">${profitSign}${fin.netProfit.toLocaleString()} ج.م</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>نوع الحركة</th>
+                <th>رقم الحركة</th>
+                <th>التاريخ</th>
+                <th>البيان / المستفيد</th>
+                <th style="text-align: left;">المبلغ</th>
+                <th>الموظف</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml || '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #64748b;">لا توجد حركات مسجلة</td></tr>'}
+            </tbody>
+          </table>
+
+          <div class="signatures">
+            <div>توقيع المشرف المسؤول: .......................</div>
+            <div>اعتماد الإدارة العامة: .......................</div>
+          </div>
+
+          <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+            نظام جرين رايت ERP السحابي | تصميم وبرمجة / أكرم سعد - 01030108199
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+        </html>
+      `;
+
+      const printWin = window.open('', '_blank');
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(printHtml);
+        printWin.document.close();
+      }
     }
 
   </script>
@@ -14014,16 +14337,80 @@ window.FULL_ERP_DATABASE = {
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-4 border-t border-blue-900/40 bg-[#060d1a] flex items-center justify-between">
-        <button onclick="exportTableToExcel('statementTableBody', 'كشف_حساب_مركز_التكلفة')" class="px-3 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition">
-          <span>📥</span><span>تصدير Excel</span>
-        </button>
-        <button onclick="shareActiveCostCenterStatementWhatsApp()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-md shadow-emerald-900/40">
+      <div class="p-4 border-t border-blue-900/40 bg-[#060d1a] flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="exportTableToExcel('statementTableBody', 'كشف_حساب_مركز_التكلفة')" class="px-3 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-800 text-emerald-300 hover:text-white border border-emerald-800/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
+            <span>📥</span><span>تصدير Excel</span>
+          </button>
+          <button onclick="printCostCenterStatement()" class="px-3 py-1.5 rounded-xl bg-blue-950 hover:bg-blue-800 text-blue-300 hover:text-white border border-blue-800/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="طباعة رسمية أو حفظ كـ PDF لإرساله كفاتورة">
+            <span>🖨️</span><span>طباعة رسمية / PDF</span>
+          </button>
+        </div>
+        <button onclick="shareActiveCostCenterStatementWhatsApp()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-md shadow-emerald-900/40 cursor-pointer">
           <span>📲</span><span>إرسال كشف الحساب واتساب</span>
         </button>
         <button onclick="closeCostCenterStatementModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
           إغلاق
         </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL: SMART WHATSAPP SHARE ==================== -->
+  <div id="whatsappShareModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-[#0f1d36] border border-emerald-600/50 rounded-2xl w-full max-w-lg p-5 sm:p-6 shadow-2xl relative text-xs">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3.5 border-b border-blue-900/40 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-lg font-bold">📲</div>
+          <div>
+            <h3 class="font-extrabold text-white text-sm" id="waModalTitle">إرسال التقرير عبر واتساب</h3>
+            <p class="text-[11px] text-slate-400" id="waModalSubtitle">إرسال مباشر إلى محادثة واتساب أو نسخ النص</p>
+          </div>
+        </div>
+        <button onclick="closeWhatsAppModal()" class="text-slate-400 hover:text-white p-1 text-base">✕</button>
+      </div>
+
+      <!-- Phone Number Input -->
+      <div class="mb-4">
+        <label class="block font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+          <span>رقم هاتف المستلم (واتساب):</span>
+          <span class="text-[10px] text-emerald-400 font-normal">اختياري - اتركه فارغاً لاختيار جهة الاتصال</span>
+        </label>
+        <input type="tel" id="waRecipientPhone" placeholder="مثال: 01030108199 أو 01234567890" 
+               class="w-full bg-[#0b1528] border border-blue-900/60 text-white rounded-xl px-3.5 py-2.5 text-xs font-mono focus:ring-2 focus:ring-emerald-500 transition">
+      </div>
+
+      <!-- Message Preview Box -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-bold text-slate-300">معاينة نص التقرير:</span>
+          <button type="button" onclick="copyWhatsAppMessageToClipboard()" id="copyWaBtn" class="text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 transition cursor-pointer">
+            <span>📋</span><span>نسخ النص</span>
+          </button>
+        </div>
+        <textarea id="waMessagePreview" readonly rows="8" 
+                  class="w-full bg-[#060d1a] border border-blue-900/50 text-slate-200 rounded-xl p-3 text-[11px] leading-relaxed font-mono resize-none focus:outline-hidden"></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between gap-2.5 pt-2 border-t border-blue-900/40">
+        <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition cursor-pointer">
+          إلغاء
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="copyWhatsAppMessageToClipboard()" class="px-3.5 py-2.5 rounded-xl bg-blue-950 hover:bg-blue-800 text-blue-300 border border-blue-800/40 font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <span>📋</span><span>نسخ التقرير</span>
+          </button>
+          
+          <button type="button" onclick="executeWhatsAppSend()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg shadow-emerald-900/40 transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <span>🚀</span><span>فتح واتساب والإرسال</span>
+          </button>
+        </div>
       </div>
 
     </div>
