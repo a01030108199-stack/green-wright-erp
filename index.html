@@ -8080,7 +8080,7 @@ window.FULL_ERP_DATABASE = {
       <div class="absolute -bottom-20 -left-20 w-44 h-44 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
       <!-- Header with Shield Logo -->
-      <div class="flex flex-col items-center text-center mb-6">
+      <div class="flex flex-col items-center text-center mb-5">
         <div class="relative mb-2">
           <img src="green-wright-logo.png" alt="GREEN WRIGHT" 
                class="w-24 sm:w-28 h-auto object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-300">
@@ -8089,36 +8089,68 @@ window.FULL_ERP_DATABASE = {
         <p class="text-xs text-emerald-400 font-bold mt-0.5">المنظومة المحاسبية للأسمدة والمبيدات الزراعية</p>
       </div>
 
+      <!-- Pinned Credentials Info Banner -->
+      <div class="mb-4 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl p-3 text-xs text-emerald-200 flex items-center justify-between shadow-inner">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-base shrink-0">📌</div>
+          <div>
+            <div class="font-bold text-white text-[12px] flex items-center gap-1.5">
+              <span>بيانات الدخول مثبتة وجاهزة:</span>
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            </div>
+            <div class="text-[11px] text-emerald-300 font-mono mt-0.5">
+              المستخدم: <strong class="text-white font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">admin</strong> | كلمة المرور: <strong class="text-white font-bold bg-emerald-900/60 px-1.5 py-0.5 rounded">123456</strong>
+            </div>
+          </div>
+        </div>
+        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 shrink-0">دخول مباشر ⚡</span>
+      </div>
+
       <!-- Login Form -->
       <form onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">اسم المستخدم</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex justify-between items-center">
+            <span>اسم المستخدم</span>
+            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">✓ مثبت مسبقاً</span>
+          </label>
           <div class="relative">
-            <input type="text" id="loginUsernameInput" required placeholder="مثال: admin أو احمد أو م/ سعد"
-                   class="w-full bg-[#0f1d36] border border-emerald-900/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition">
+            <input type="text" id="loginUsernameInput" required value="admin" placeholder="مثال: admin أو احمد أو م/ سعد"
+                   class="w-full bg-[#0f1d36] border border-emerald-600/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition shadow-inner">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1.5">كلمة المرور</label>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5 flex justify-between items-center">
+            <span>كلمة المرور</span>
+            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">✓ مثبتة مسبقاً</span>
+          </label>
           <div class="relative">
-            <input type="password" id="loginPasswordInput" required placeholder="••••••••"
-                   class="w-full bg-[#0f1d36] border border-emerald-900/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition">
+            <input type="text" id="loginPasswordInput" required value="123456" placeholder="••••••••"
+                   class="w-full bg-[#0f1d36] border border-emerald-600/60 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition shadow-inner font-mono tracking-wider">
+            <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-300 text-sm focus:outline-hidden p-1 cursor-pointer transition" title="إظهار / إخفاء كلمة المرور">
+              <span id="loginEyeIcon">🔒</span>
+            </button>
           </div>
         </div>
 
         <!-- Quick Role Selector for Convenience -->
         <div>
-          <label class="block text-[11px] text-slate-400 mb-1">دخول سريع كمستخدم تجريبي:</label>
+          <label class="block text-[11px] text-slate-400 mb-1.5 flex items-center justify-between">
+            <span>⚡ اختيار مستخدم وتثبيته فوراً بنقرة واحدة:</span>
+            <span class="text-[10px] text-emerald-400 font-mono">3 حسابات مسجلة</span>
+          </label>
           <div class="grid grid-cols-3 gap-2 text-[11px]">
-            <button type="button" onclick="setQuickLogin('admin', '123456', 'المدير العام')" class="bg-[#0f1d36] hover:bg-emerald-950/70 border border-emerald-800/40 text-emerald-300 py-1.5 rounded-lg font-bold transition text-center cursor-pointer shadow-xs">
-              👑 المدير العام
+            <button type="button" onclick="setQuickLogin('admin', '123456', 'المدير العام')" class="bg-[#0f1d36] hover:bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
+              <span>👑 المدير العام</span>
+              <span class="text-[9px] text-slate-400 font-mono">admin</span>
             </button>
-            <button type="button" onclick="setQuickLogin('احمد', '123456', 'المحاسب المسؤول')" class="bg-[#0f1d36] hover:bg-blue-950/70 border border-blue-800/40 text-blue-300 py-1.5 rounded-lg font-bold transition text-center cursor-pointer shadow-xs">
-              💼 المحاسب
+            <button type="button" onclick="setQuickLogin('احمد', '123456', 'محاسب النظام')" class="bg-[#0f1d36] hover:bg-blue-950/80 border border-blue-700/60 text-blue-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
+              <span>💼 المحاسب</span>
+              <span class="text-[9px] text-slate-400 font-mono">احمد</span>
             </button>
-            <button type="button" onclick="setQuickLogin('احمد مرضي', '123456', 'مندوب المبيعات')" class="bg-[#0f1d36] hover:bg-teal-950/70 border border-teal-800/40 text-teal-300 py-1.5 rounded-lg font-bold transition text-center cursor-pointer shadow-xs">
-              🌾 المندوب
+            <button type="button" onclick="setQuickLogin('احمد مرضي', '123456', 'مندوب مبيعات')" class="bg-[#0f1d36] hover:bg-teal-950/80 border border-teal-700/60 text-teal-300 py-2 px-1 rounded-xl font-bold transition text-center cursor-pointer shadow-xs active:scale-95 flex flex-col items-center gap-0.5">
+              <span>🌾 المندوب</span>
+              <span class="text-[9px] text-slate-400 font-mono">احمد مرضي</span>
             </button>
           </div>
         </div>
@@ -8127,9 +8159,9 @@ window.FULL_ERP_DATABASE = {
           اسم المستخدم أو كلمة المرور غير صحيحة!
         </div>
 
-        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-700/40 transition text-xs mt-2 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-          <span>🔐</span>
-          <span>تسجيل الدخول إلى النظام</span>
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-700/40 transition text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+          <span class="text-base">🔐</span>
+          <span>تسجيل الدخول إلى النظام (دخول فوري)</span>
         </button>
       </form>
 
@@ -10203,6 +10235,27 @@ window.FULL_ERP_DATABASE = {
     // ==================== AUTHENTICATION ENGINE ====================
     let currentUser = null;
 
+    function getSavedCredentials() {
+      try {
+        const saved = localStorage.getItem('erp_saved_login_creds');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+      return { username: 'admin', pass: '123456' };
+    }
+
+    function toggleLoginPasswordVisibility() {
+      const pwdInput = document.getElementById('loginPasswordInput');
+      const eyeIcon = document.getElementById('loginEyeIcon');
+      if (!pwdInput) return;
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        if (eyeIcon) eyeIcon.textContent = '🔒';
+      } else {
+        pwdInput.type = 'password';
+        if (eyeIcon) eyeIcon.textContent = '👁️';
+      }
+    }
+
     function checkAuthSession() {
       try {
         const saved = sessionStorage.getItem('erp_active_user');
@@ -10213,6 +10266,13 @@ window.FULL_ERP_DATABASE = {
           document.getElementById('loginScreenModal').classList.remove('hidden');
           const app = document.getElementById('mainAppWrapper');
           if (app) app.classList.add('hidden');
+
+          // Always ensure pinned credentials are pre-filled
+          const creds = getSavedCredentials();
+          const uInput = document.getElementById('loginUsernameInput');
+          const pInput = document.getElementById('loginPasswordInput');
+          if (uInput) uInput.value = creds.username || 'admin';
+          if (pInput) pInput.value = creds.pass || '123456';
         }
       } catch (e) {
         document.getElementById('loginScreenModal').classList.remove('hidden');
@@ -10222,9 +10282,15 @@ window.FULL_ERP_DATABASE = {
     }
 
     function setQuickLogin(username, pass, role) {
-      document.getElementById('loginUsernameInput').value = username;
-      document.getElementById('loginPasswordInput').value = pass;
-      document.getElementById('loginErrorMessage').classList.add('hidden');
+      const uInput = document.getElementById('loginUsernameInput');
+      const pInput = document.getElementById('loginPasswordInput');
+      if (uInput) uInput.value = username;
+      if (pInput) pInput.value = pass;
+      try {
+        localStorage.setItem('erp_saved_login_creds', JSON.stringify({ username, pass }));
+      } catch (e) {}
+      const err = document.getElementById('loginErrorMessage');
+      if (err) err.classList.add('hidden');
     }
 
     function handleLogin() {
@@ -10267,6 +10333,7 @@ window.FULL_ERP_DATABASE = {
 
       try {
         sessionStorage.setItem('erp_active_user', JSON.stringify(currentUser));
+        localStorage.setItem('erp_saved_login_creds', JSON.stringify({ username: u, pass: p }));
       } catch (e) {}
 
       applyLoggedInUser();
@@ -10315,8 +10382,13 @@ window.FULL_ERP_DATABASE = {
         const adminSec = document.getElementById('section-admin');
         if (adminSec) adminSec.classList.add('hidden');
 
-        document.getElementById('loginUsernameInput').value = '';
-        document.getElementById('loginPasswordInput').value = '';
+        // Restore pinned credentials so user doesn't have to retype them
+        const creds = getSavedCredentials();
+        const uInput = document.getElementById('loginUsernameInput');
+        const pInput = document.getElementById('loginPasswordInput');
+        if (uInput) uInput.value = creds.username || 'admin';
+        if (pInput) pInput.value = creds.pass || '123456';
+
         document.getElementById('loginErrorMessage').classList.add('hidden');
         document.getElementById('loginScreenModal').classList.remove('hidden');
         const app = document.getElementById('mainAppWrapper');
