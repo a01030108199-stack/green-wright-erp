@@ -10537,6 +10537,7 @@ window.FULL_ERP_DATABASE = {
       try { renderEntriesTable(db.dailyEntries); } catch (e) { console.error(e); }
       try { renderPurchasesTable(db.purchaseInvoices); } catch (e) { console.error(e); }
       try { renderTrialBalanceTable(db.trialBalance); } catch (e) { console.error(e); }
+      try { renderAnalyticsDashboard(); } catch (e) { console.error(e); }
       setupAutocomplete();
       setupInvoiceClientAutocomplete();
       setupPaymentSupplierAutocomplete();
@@ -11670,11 +11671,19 @@ window.FULL_ERP_DATABASE = {
         tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-500 text-xs">لا يوجد عملاء مسجلين</td></tr>';
         return;
       }
+      const baseClients = (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.clients) || [];
+      const baseMap = new Map(baseClients.map(c => [String(c.id), c]));
       tbody.innerHTML = list.map((c, idx) => {
-        const openBal = Number(c.openBalance != null ? c.openBalance : 0);
-        const sales = Number(c.totalSales != null ? c.totalSales : 0);
-        const receipts = Number(c.totalReceipts != null ? c.totalReceipts : 0);
-        const bal = Number(c.balance != null ? c.balance : (openBal + sales - receipts));
+        const base = baseMap.get(String(c.id)) || {};
+        const openBal = Number(c.openBalance != null ? c.openBalance : (base.openBalance || 0));
+        const sales = Math.max(Number(c.totalSales != null ? c.totalSales : 0), Number(base.totalSales || 0));
+        const receipts = Math.max(Number(c.totalReceipts != null ? c.totalReceipts : 0), Number(base.totalReceipts || 0));
+        let bal = Number(c.balance != null ? c.balance : 0);
+        if (bal === 0 && Number(base.balance || 0) > 0) {
+          bal = Number(base.balance);
+        } else if (bal === 0 && (openBal > 0 || sales > 0 || receipts > 0)) {
+          bal = openBal + sales - receipts;
+        }
         const isDebt = bal > 0;
         return `
         <tr class="${idx % 2 === 1 ? 'bg-[#0d182e]' : 'bg-[#0f1d36]'} hover:bg-blue-900/30 transition">
@@ -12396,8 +12405,8 @@ window.FULL_ERP_DATABASE = {
         if (saved) {
           const list = JSON.parse(saved);
           list.forEach(c => {
-            if (!db.clients.some(x => x.id === c.id || x.name === c.name)) {
-              db.clients.unshift(c);
+            if (!db.clients.some(x => String(x.id) === String(c.id) || x.name === c.name)) {
+              db.clients.push(c);
             }
           });
         }
@@ -13143,7 +13152,15 @@ window.FULL_ERP_DATABASE = {
                 const c = change.doc.data();
                 const existingIdx = db.clients.findIndex(x => String(x.id) === String(c.id));
                 if (existingIdx !== -1) {
-                  db.clients[existingIdx] = c;
+                  const cur = db.clients[existingIdx];
+                  db.clients[existingIdx] = {
+                    ...cur,
+                    ...c,
+                    totalSales: Number(c.totalSales) > 0 ? Number(c.totalSales) : (Number(cur.totalSales) || 0),
+                    totalReceipts: Number(c.totalReceipts) > 0 ? Number(c.totalReceipts) : (Number(cur.totalReceipts) || 0),
+                    balance: (c.balance !== undefined && Number(c.balance) !== 0) ? Number(c.balance) : (Number(cur.balance) || 0),
+                    openBalance: c.openBalance !== undefined ? Number(c.openBalance) : (Number(cur.openBalance) || 0)
+                  };
                   hasNew = true;
                 } else {
                   db.clients.unshift(c);
@@ -13154,6 +13171,7 @@ window.FULL_ERP_DATABASE = {
             if (hasNew) {
               saveCustomClientsToStorage();
               renderClientsTable(db.clients);
+              try { renderAnalyticsDashboard(); } catch (e) {}
               const b = document.getElementById('countClientsBadge');
               if (b) b.textContent = db.clients.length;
             }
@@ -13486,12 +13504,30 @@ window.FULL_ERP_DATABASE = {
       const invoices = db.salesInvoices || [];
       const receipts = db.cashReceipts || [];
       const items = db.items || [];
+      const baseClients = (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.clients) || [];
+      const baseMap = new Map(baseClients.map(c => [String(c.id), c]));
+
+      // Enrich clients with base data if missing/zero
+      clients.forEach(c => {
+        const base = baseMap.get(String(c.id));
+        if (base) {
+          if (!c.totalSales || Number(c.totalSales) === 0) c.totalSales = Number(base.totalSales || 0);
+          if (!c.totalReceipts || Number(c.totalReceipts) === 0) c.totalReceipts = Number(base.totalReceipts || 0);
+          if (!c.openBalance || Number(c.openBalance) === 0) c.openBalance = Number(base.openBalance || 0);
+          if ((c.balance == null || Number(c.balance) === 0) && Number(base.balance || 0) > 0) {
+            c.balance = Number(base.balance || 0);
+          }
+        }
+        if (c.balance == null) {
+          c.balance = Number(c.openBalance || 0) + Number(c.totalSales || 0) - Number(c.totalReceipts || 0);
+        }
+      });
 
       // Calculate totals
       const totalSales = invoices.reduce((sum, inv) => sum + Number(inv.netAmount || inv.amount || 0), 0);
       const totalReceipts = receipts.reduce((sum, r) => sum + Number(r.amount || 0), 0);
       const totalDebts = clients.reduce((sum, c) => {
-        const bal = Number(c.balance != null ? c.balance : (Number(c.openBalance || 0) + Number(c.totalSales || 0) - Number(c.totalReceipts || 0)));
+        const bal = Number(c.balance || 0);
         return sum + (bal > 0 ? bal : 0);
       }, 0);
 
@@ -13508,8 +13544,11 @@ window.FULL_ERP_DATABASE = {
       if (document.getElementById('kpiCollectionRate')) document.getElementById('kpiCollectionRate').textContent = collectionRate + '%';
       if (document.getElementById('kpiProgressBar')) document.getElementById('kpiProgressBar').style.width = collectionRate + '%';
 
-      // Top Clients by Sales
-      const topClients = [...clients].sort((a, b) => Number(b.totalSales || 0) - Number(a.totalSales || 0)).slice(0, 5);
+      // Top Clients by Sales (only clients with actual sales > 0)
+      const topClients = [...clients]
+        .filter(c => Number(c.totalSales || 0) > 0)
+        .sort((a, b) => Number(b.totalSales || 0) - Number(a.totalSales || 0))
+        .slice(0, 5);
       const topClientsContainer = document.getElementById('topClientsList');
       if (topClientsContainer) {
         topClientsContainer.innerHTML = topClients.map((c, i) => `
