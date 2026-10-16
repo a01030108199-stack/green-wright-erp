@@ -3,10 +3,11 @@
  * Enables PWA installation on iOS and Android devices, and basic offline caching.
  */
 
-const CACHE_NAME = 'gw-erp-v1';
+const CACHE_NAME = 'gw-erp-v2';
 const ASSETS_TO_CACHE = [
   './index.html',
   './tailwind.js',
+  './chart.min.js',
   './green-wright-logo.png',
   './login-bg.jpg',
   './manifest.webmanifest'

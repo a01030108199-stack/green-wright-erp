@@ -23,6 +23,13 @@
       document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
     }
   </script>
+  <!-- Chart.js with Local & CDN Fallback -->
+  <script src="chart.min.js"></script>
+  <script>
+    if (!window.Chart) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"><\/script>');
+    }
+  </script>
   <!-- Embedded Migrated Database -->
   <script>
 window.FULL_ERP_DATABASE = {
@@ -9371,6 +9378,79 @@ window.FULL_ERP_DATABASE = {
         </div>
       </div>
 
+      <!-- Interactive Financial Visual Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Chart 1: Monthly Sales & Purchases Trend (Span 2 Cols) -->
+        <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl lg:col-span-2 flex flex-col">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-blue-900/40">
+            <div>
+              <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                <span>📈</span><span>مسار ونمو المبيعات والمشتريات شهرياً</span>
+              </h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">مقارنة شهرية بين حجم المبيعات وفواتير البضاعة الواردة لعام 2026</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-bold">
+              <span class="flex items-center gap-1.5 text-emerald-400">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm"></span>
+                <span>المبيعات</span>
+              </span>
+              <span class="flex items-center gap-1.5 text-indigo-400">
+                <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block shadow-sm"></span>
+                <span>المشتريات</span>
+              </span>
+            </div>
+          </div>
+          <div class="relative w-full h-[280px]">
+            <canvas id="salesMonthlyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Liquidity vs Debt Distribution Donut (1 Col) -->
+        <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-900/40">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🍩</span><span>توزيع السيولة النقدية مقابل المديونية</span>
+            </h3>
+            <span id="chartDonutPercentBadge" class="text-[11px] text-emerald-400 font-semibold font-mono">53% محصل</span>
+          </div>
+          <div class="relative w-full h-[210px] flex items-center justify-center my-auto">
+            <canvas id="liquidityDonutChart"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span id="chartDonutCenterPercent" class="text-2xl font-black text-emerald-400 font-mono">53%</span>
+              <span class="text-[10px] text-slate-400 font-bold">محصل</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-blue-900/30 text-xs">
+            <div class="p-2.5 rounded-xl bg-[#0b1528] border border-emerald-900/40 text-center">
+              <div class="text-[10px] text-slate-400">سيولة محصلة بالخزائن</div>
+              <div id="chartCashDisplay" class="font-bold text-emerald-400 font-mono mt-0.5 text-xs">3,323,614 ج.م</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-[#0b1528] border border-amber-900/40 text-center">
+              <div class="text-[10px] text-slate-400">مديونيات قائمة بالسوق</div>
+              <div id="chartDebtDisplay" class="font-bold text-amber-400 font-mono mt-0.5 text-xs">2,637,723 ج.م</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Chart 3: Top Clients Sales Volume Horizontal Chart -->
+      <div class="bg-[#0f1d36] p-6 rounded-2xl border border-blue-900/40 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-blue-900/40">
+          <div>
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>🏆</span><span>هيكل سحوبات ومبيعات كبار العملاء بالسوق</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">ترتيب العملاء الأكثر طلباً وتأثيراً في إيرادات المنظومة</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-blue-950 text-blue-300 border border-blue-800/40 text-[11px] font-bold">تحليل الحصص السوقية</span>
+        </div>
+        <div class="relative w-full h-[220px]">
+          <canvas id="topClientsBarChart"></canvas>
+        </div>
+      </div>
+
       <!-- Charts & Top Lists Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Top Clients by Balance / Sales -->
@@ -13746,12 +13826,216 @@ window.FULL_ERP_DATABASE = {
       document.body.removeChild(link);
     }
 
-    // 3. Executive Dashboard & KPI Calculator
+    // 3. Visual Charts Engine & Manager
+    let _gwChartSales = null;
+    let _gwChartDonut = null;
+    let _gwChartClients = null;
+
+    function renderVisualCharts(invoices, purchases, totalReceipts, totalDebts, topClients) {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded yet');
+        return;
+      }
+
+      // 1. Group Monthly Sales & Purchases
+      const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+      const months = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"];
+      const labels = months.map(m => {
+        const idx = parseInt(m.split('-')[1], 10) - 1;
+        return monthNames[idx] || m;
+      });
+
+      const salesData = months.map(m => {
+        return invoices
+          .filter(inv => String(inv.date || '').startsWith(m))
+          .reduce((sum, inv) => sum + Number(inv.netAmount || inv.amount || 0), 0);
+      });
+
+      const purchasesData = months.map(m => {
+        return purchases
+          .filter(p => String(p.date || '').startsWith(m))
+          .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      });
+
+      // Chart 1: Monthly Trend
+      const ctxSales = document.getElementById('salesMonthlyChart');
+      if (ctxSales) {
+        if (_gwChartSales) _gwChartSales.destroy();
+        _gwChartSales = new Chart(ctxSales, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'المبيعات (ج.م)',
+                data: salesData,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#ffffff',
+                pointRadius: 4,
+                pointHoverRadius: 7
+              },
+              {
+                label: 'المشتريات (ج.م)',
+                data: purchasesData,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                borderWidth: 2,
+                borderDash: [4, 4],
+                fill: false,
+                tension: 0.3,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#ffffff',
+                pointRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleFont: { family: 'Cairo', size: 12 },
+                bodyFont: { family: 'Cairo', size: 12 },
+                borderColor: 'rgba(59, 130, 246, 0.3)',
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString()} ج.م`
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(30, 58, 138, 0.15)' },
+                ticks: { color: '#94a3b8', font: { family: 'Cairo', size: 11 } }
+              },
+              y: {
+                position: 'right',
+                grid: { color: 'rgba(30, 58, 138, 0.2)' },
+                ticks: {
+                  color: '#94a3b8',
+                  font: { family: 'Cairo', size: 10 },
+                  callback: (val) => (val >= 1000000 ? (val / 1000000).toFixed(1) + 'M' : (val / 1000).toFixed(0) + 'k') + ' ج.م'
+                }
+              }
+            }
+          }
+        });
+        window._gwChartSales = _gwChartSales;
+      }
+
+      // Chart 2: Donut Liquidity vs Debt
+      const ctxDonut = document.getElementById('liquidityDonutChart');
+      if (ctxDonut) {
+        if (_gwChartDonut) _gwChartDonut.destroy();
+        _gwChartDonut = new Chart(ctxDonut, {
+          type: 'doughnut',
+          data: {
+            labels: ['السيولة المحصلة بالخزائن', 'المديونيات بالسوق'],
+            datasets: [{
+              data: [totalReceipts, totalDebts],
+              backgroundColor: ['#10b981', '#f59e0b'],
+              borderColor: '#0f1d36',
+              borderWidth: 4,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleFont: { family: 'Cairo' },
+                bodyFont: { family: 'Cairo' },
+                callbacks: {
+                  label: (ctx) => `${ctx.label}: ${Number(ctx.raw).toLocaleString()} ج.م`
+                }
+              }
+            }
+          }
+        });
+        window._gwChartDonut = _gwChartDonut;
+      }
+
+      // Chart 3: Top Clients Horizontal Bar Chart
+      const ctxClients = document.getElementById('topClientsBarChart');
+      if (ctxClients) {
+        if (_gwChartClients) _gwChartClients.destroy();
+        const top7 = topClients.slice(0, 7);
+        _gwChartClients = new Chart(ctxClients, {
+          type: 'bar',
+          data: {
+            labels: top7.map(c => c.name),
+            datasets: [{
+              label: 'إجمالي السحوبات (ج.م)',
+              data: top7.map(c => c.totalSales),
+              backgroundColor: [
+                'rgba(245, 158, 11, 0.85)',
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(99, 102, 241, 0.8)',
+                'rgba(168, 85, 247, 0.8)',
+                'rgba(236, 72, 153, 0.8)',
+                'rgba(14, 165, 233, 0.8)'
+              ],
+              borderColor: '#1e293b',
+              borderWidth: 1,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                titleFont: { family: 'Cairo' },
+                bodyFont: { family: 'Cairo' },
+                callbacks: {
+                  label: (ctx) => `سحوبات: ${Number(ctx.raw).toLocaleString()} ج.م`
+                }
+              }
+            },
+            scales: {
+              x: {
+                position: 'bottom',
+                grid: { color: 'rgba(30, 58, 138, 0.15)' },
+                ticks: {
+                  color: '#94a3b8',
+                  font: { family: 'Cairo', size: 10 },
+                  callback: (val) => (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val)
+                }
+              },
+              y: {
+                grid: { display: false },
+                ticks: { color: '#f8fafc', font: { family: 'Cairo', size: 11, weight: 'bold' } }
+              }
+            }
+          }
+        });
+        window._gwChartClients = _gwChartClients;
+      }
+    }
+
+    // 4. Executive Dashboard & KPI Calculator
     function renderAnalyticsDashboard() {
       const clients = db.clients || [];
       const invoices = db.salesInvoices || [];
       const receipts = db.cashReceipts || [];
       const items = db.items || [];
+      const purchases = db.purchaseInvoices || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.purchaseInvoices) || [];
       const baseClients = (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.clients) || [];
       const baseMap = new Map(baseClients.map(c => [String(c.id), c]));
 
@@ -13793,10 +14077,10 @@ window.FULL_ERP_DATABASE = {
       if (document.getElementById('kpiProgressBar')) document.getElementById('kpiProgressBar').style.width = collectionRate + '%';
 
       // Top Clients by Sales (only clients with actual sales > 0)
-      const topClients = [...clients]
+      const allTopClients = [...clients]
         .filter(c => Number(c.totalSales || 0) > 0)
-        .sort((a, b) => Number(b.totalSales || 0) - Number(a.totalSales || 0))
-        .slice(0, 5);
+        .sort((a, b) => Number(b.totalSales || 0) - Number(a.totalSales || 0));
+      const topClients = allTopClients.slice(0, 5);
       const topClientsContainer = document.getElementById('topClientsList');
       if (topClientsContainer) {
         topClientsContainer.innerHTML = topClients.map((c, i) => `
@@ -13862,6 +14146,25 @@ window.FULL_ERP_DATABASE = {
             </td>
           </tr>
         `).join('');
+      }
+
+      // Update visual chart metrics & invoke renderVisualCharts
+      if (document.getElementById('chartCashDisplay')) {
+        document.getElementById('chartCashDisplay').textContent = totalReceipts.toLocaleString() + ' ج.م';
+      }
+      if (document.getElementById('chartDebtDisplay')) {
+        document.getElementById('chartDebtDisplay').textContent = totalDebts.toLocaleString() + ' ج.م';
+      }
+      const donutBadge = document.getElementById('chartDonutPercentBadge');
+      const donutCenter = document.getElementById('chartDonutCenterPercent');
+      const cashRatio = (totalReceipts + totalDebts) > 0 ? Math.round((totalReceipts / (totalReceipts + totalDebts)) * 100) : 53;
+      if (donutBadge) donutBadge.textContent = cashRatio + '% محصل';
+      if (donutCenter) donutCenter.textContent = cashRatio + '%';
+
+      try {
+        renderVisualCharts(invoices, purchases, totalReceipts, totalDebts, allTopClients);
+      } catch (err) {
+        console.error('Visual charts rendering error:', err);
       }
     }
 
