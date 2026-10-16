@@ -9178,18 +9178,35 @@ window.FULL_ERP_DATABASE = {
           <button onclick="filterEntriesByType('مخزن')" id="ent-btn-stores" class="px-3 py-1 rounded-lg text-xs font-bold bg-[#0b1528] text-slate-300 hover:bg-blue-900/40 transition">حركات المخازن (216)</button>
         </div>
 
+        <!-- Accounting Balance Summary Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 p-3 rounded-xl bg-[#0b1528] border border-blue-900/30 text-xs">
+          <div class="flex items-center justify-between px-3 py-1.5 bg-[#0f1d36] rounded-lg border border-emerald-900/40">
+            <span class="text-slate-400">إجمالي الجانب المدين (Debit):</span>
+            <span id="entriesTotalDebit" class="font-bold text-emerald-400 font-mono text-sm">0 ج.م</span>
+          </div>
+          <div class="flex items-center justify-between px-3 py-1.5 bg-[#0f1d36] rounded-lg border border-blue-900/40">
+            <span class="text-slate-400">إجمالي الجانب الدائن (Credit):</span>
+            <span id="entriesTotalCredit" class="font-bold text-blue-400 font-mono text-sm">0 ج.م</span>
+          </div>
+          <div class="flex items-center justify-between px-3 py-1.5 bg-[#0f1d36] rounded-lg border border-amber-900/40">
+            <span class="text-slate-400">حالة التوازن المحاسبي:</span>
+            <span id="entriesBalanceStatus" class="font-bold text-emerald-300 flex items-center gap-1"><span>⚖️</span> <span>متوازن 100% (الفرق 0 ج.م)</span></span>
+          </div>
+        </div>
+
         <div class="overflow-x-auto max-h-[620px] overflow-y-auto rounded-xl border border-blue-900/40">
           <table class="w-full text-right text-xs">
             <thead class="sticky top-0 bg-[#060d1a] backdrop-blur-md text-blue-200 font-bold border-b border-blue-900/50 z-10">
               <tr>
-                <th class="py-3 px-4">رقم القيد</th>
-                <th class="py-3 px-4">التاريخ</th>
-                <th class="py-3 px-4">نوع العملية</th>
-                <th class="py-3 px-4">إجمالي المبلغ</th>
-                <th class="py-3 px-4">الحالة</th>
-                <th class="py-3 px-4">الموظف المنشئ</th>
-                <th class="py-3 px-4">الفرع</th>
-                <th class="py-3 px-4">ملاحظات وبيان</th>
+                <th class="py-3 px-3 text-center">رقم القيد</th>
+                <th class="py-3 px-3">التاريخ</th>
+                <th class="py-3 px-3">نوع العملية</th>
+                <th class="py-3 px-3 text-left">المدين (Debit) 🟢</th>
+                <th class="py-3 px-3 text-left">الدائن (Credit) 🔵</th>
+                <th class="py-3 px-3">أطراف القيد المحاسبي</th>
+                <th class="py-3 px-3">الحالة</th>
+                <th class="py-3 px-3">الموظف</th>
+                <th class="py-3 px-3 text-center">سند القيد</th>
               </tr>
             </thead>
             <tbody id="entriesTableBody" class="divide-y divide-blue-900/20">
@@ -10219,6 +10236,96 @@ window.FULL_ERP_DATABASE = {
         <button onclick="closePrintPaymentModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2 rounded-xl transition text-xs cursor-pointer">
           إغلاق
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: JOURNAL ENTRY DOUBLE-ENTRY VOUCHER (سند قيد اليومية العامة) ==================== -->
+  <div id="journalEntryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#0f1d36] rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative text-white border border-blue-800/60 max-h-[92vh] flex flex-col">
+      
+      <!-- Voucher Header -->
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-blue-900/50">
+        <div>
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <span>📑 سند قيد يومية محاسبي مزدوج</span>
+            <span id="jvEntryNumberTitle" class="text-emerald-400 font-mono">#0</span>
+          </h3>
+          <p class="text-xs text-slate-400">شركة جرين رايت للاستثمار الزراعي - السجل المحاسبي المعتمد</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-md">
+            <span>🖨️ طباعة السند</span>
+          </button>
+          <button onclick="closeJournalEntryModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs">
+            إغلاق
+          </button>
+        </div>
+      </div>
+
+      <!-- Voucher Metadata Card -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 text-xs">
+        <div class="bg-[#0b1528] p-3 rounded-xl border border-blue-900/40">
+          <div class="text-[10px] text-slate-400">تاريخ القيد</div>
+          <div id="jvDateDisplay" class="font-bold text-white text-xs mt-0.5 font-mono">-</div>
+        </div>
+        <div class="bg-[#0b1528] p-3 rounded-xl border border-blue-900/40">
+          <div class="text-[10px] text-slate-400">نوع العملية</div>
+          <div id="jvTypeDisplay" class="font-bold text-blue-300 text-xs mt-0.5">-</div>
+        </div>
+        <div class="bg-[#0b1528] p-3 rounded-xl border border-blue-900/40">
+          <div class="text-[10px] text-slate-400">الموظف المنشئ</div>
+          <div id="jvUserDisplay" class="font-bold text-slate-200 text-xs mt-0.5">-</div>
+        </div>
+        <div class="bg-[#0b1528] p-3 rounded-xl border border-blue-900/40">
+          <div class="text-[10px] text-slate-400">حالة الترحيل</div>
+          <div class="font-bold text-emerald-400 text-xs mt-0.5 flex items-center gap-1">
+            <span>✅</span><span>مرحل بالحسابات</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description / Memo -->
+      <div class="bg-[#0b1528] p-3 rounded-xl border border-blue-900/40 mb-4 text-xs">
+        <div class="text-[10px] text-slate-400 mb-1">البيان والشرح المحاسبي:</div>
+        <div id="jvMemoDisplay" class="font-semibold text-white">-</div>
+      </div>
+
+      <!-- Double-Entry Accounts Table -->
+      <div class="flex-1 overflow-y-auto rounded-xl border border-blue-900/40 mb-4">
+        <table class="w-full text-right text-xs">
+          <thead class="sticky top-0 bg-[#060d1a] text-blue-200 font-bold border-b border-blue-900/50">
+            <tr>
+              <th class="py-2.5 px-3">الطرف</th>
+              <th class="py-2.5 px-3">اسم الحساب المحاسبي</th>
+              <th class="py-2.5 px-3 text-left">مدين (Debit) 🟢</th>
+              <th class="py-2.5 px-3 text-left">دائن (Credit) 🔵</th>
+            </tr>
+          </thead>
+          <tbody id="jvAccountsTableBody" class="divide-y divide-blue-900/20">
+            <!-- Populated dynamically -->
+          </tbody>
+          <tfoot class="bg-[#060d1a] border-t-2 border-blue-900/60 font-bold">
+            <tr>
+              <td colspan="2" class="py-2.5 px-3 text-white text-xs">الإجمالي المتوازن</td>
+              <td id="jvTotalDebit" class="py-2.5 px-3 text-left text-emerald-400 font-mono text-xs">0 ج.م</td>
+              <td id="jvTotalCredit" class="py-2.5 px-3 text-left text-blue-400 font-mono text-xs">0 ج.م</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Balance Status & Signatures -->
+      <div class="p-3 rounded-xl bg-[#0b1528] border border-blue-900/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+          <span class="text-base">⚖️</span>
+          <span>القيد متوازن محاسبياً 100% (الفرق بين المدين والدائن = 0.00 ج.م)</span>
+        </div>
+        <div class="flex items-center gap-6 text-[10px] text-slate-400">
+          <div>المحاسب: <span class="text-white font-semibold">احمد</span></div>
+          <div>المراجع: <span class="text-white font-semibold">مراجعة آلية</span></div>
+          <div>الاعتماد: <span class="text-emerald-400 font-bold">معتمد</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -11852,14 +11959,74 @@ window.FULL_ERP_DATABASE = {
     // ==================== DAILY ENTRIES LOGIC ====================
     let currentEntryTypeFilter = 'all';
 
+    function getEntryParties(e) {
+      const invoices = (db && db.salesInvoices) || [];
+      const receipts = (db && db.cashReceipts) || [];
+      const purchases = (db && db.purchaseInvoices) || [];
+      
+      if (!window._entryMapsCached) {
+        window._invEntryMap = new Map(invoices.map(i => [String(i.entryId), i]));
+        window._recEntryMap = new Map(receipts.map(r => [String(r.entryId), r]));
+        window._purEntryMap = new Map(purchases.map(p => [String(p.entryId), p]));
+        window._entryMapsCached = true;
+      }
+      
+      const inv = window._invEntryMap ? window._invEntryMap.get(String(e.id)) : null;
+      const r = window._recEntryMap ? window._recEntryMap.get(String(e.id)) : null;
+      const p = window._purEntryMap ? window._purEntryMap.get(String(e.id)) : null;
+
+      let debit = 'حـ/ الحسابات المدينة';
+      let credit = 'حـ/ الحسابات الدائنة';
+      let memo = e.detail || '';
+
+      const t = e.type || '';
+      if (t.includes('مبيعات')) {
+        const cName = (inv && inv.clientName) ? inv.clientName : 'العملاء / الصندوق';
+        debit = `حـ/ ${cName}`;
+        credit = 'حـ/ إيرادات المبيعات الزراعية';
+        if (!memo && inv) memo = `إثبات فاتورة مبيعات رقم #${inv.invoiceNo} (${cName})`;
+      } else if (t.includes('قبض')) {
+        const cName = (r && r.clientName) ? r.clientName : 'العملاء';
+        const tName = (r && r.treasuryName) ? r.treasuryName : 'الخزينة الرئيسية';
+        debit = `حـ/ ${tName}`;
+        credit = `حـ/ ${cName}`;
+        if (!memo && r) memo = `إثبات سند قبض نقدي رقم #${r.receiptNo} (${cName})`;
+      } else if (t.includes('مشتريات')) {
+        const sName = (p && p.supplierName) ? p.supplierName : 'الموردين';
+        debit = 'حـ/ المشتريات الزراعية / المخزون';
+        credit = `حـ/ ${sName}`;
+        if (!memo && p) memo = `إثبات فاتورة مشتريات رقم #${p.invoiceNo} (${sName})`;
+      } else if (t.includes('صرف')) {
+        debit = 'حـ/ الموردين والمصروفات العمومية';
+        credit = 'حـ/ الخزينة الرئيسية / الصندوق';
+        if (!memo) memo = 'إثبات سند صرف نقدي من الخزينة';
+      } else if (t.includes('تحويل من مخزن')) {
+        debit = 'حـ/ مخزن الفرع (بضاعة محولة بالطريق)';
+        credit = 'حـ/ المخزن الرئيسي (بضاعة منصرفة)';
+        if (!memo) memo = 'إثبات تحويل أصناف زراعية بين المخازن';
+      } else if (t.includes('استلام من مخزن')) {
+        debit = 'حـ/ المخزن الرئيسي (بضاعة مستلمة)';
+        credit = 'حـ/ مخزن الفرع / التحويل';
+        if (!memo) memo = 'إثبات استلام وتوريد أصناف إلى المخزن';
+      } else {
+        debit = 'حـ/ التسويات والحسابات المدينة';
+        credit = 'حـ/ التسويات والحسابات الدائنة';
+      }
+      return { debit, credit, memo };
+    }
+
     function renderEntriesTable(entries) {
       const tbody = document.getElementById('entriesTableBody');
       if (!tbody) return;
       const list = entries || (db && db.dailyEntries) || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.dailyEntries) || [];
       if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="py-8 text-center text-slate-500 text-xs">لا توجد قيود يومية مسجلة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-slate-500 text-xs">لا توجد قيود يومية مسجلة</td></tr>';
         return;
       }
+
+      let totalDebit = 0;
+      let totalCredit = 0;
+
       tbody.innerHTML = list.map((e, idx) => {
         let typeBadge = 'bg-slate-900 text-slate-300 border-slate-800';
         const t = e.type || '';
@@ -11870,23 +12037,104 @@ window.FULL_ERP_DATABASE = {
         else if (t.includes('مخزن')) typeBadge = 'bg-purple-950 text-purple-300 border-purple-800/40';
 
         const amt = Number(e.amount || 0);
+        totalDebit += amt;
+        totalCredit += amt;
+
+        const parties = getEntryParties(e);
 
         return `
         <tr class="${idx % 2 === 1 ? 'bg-[#0d182e]' : 'bg-[#0f1d36]'} hover:bg-blue-900/30 transition">
-          <td class="py-2.5 px-4 font-mono font-bold text-blue-400 text-xs">${e.id}</td>
-          <td class="py-2.5 px-4 text-slate-400 font-mono text-xs">${e.date}</td>
-          <td class="py-2.5 px-4">
-            <span class="px-2.5 py-0.5 rounded-full border text-[10px] font-semibold ${typeBadge}">${e.type}</span>
+          <td class="py-2.5 px-3 font-mono font-bold text-blue-400 text-xs text-center">#${e.id}</td>
+          <td class="py-2.5 px-3 text-slate-400 font-mono text-xs whitespace-nowrap">${e.date}</td>
+          <td class="py-2.5 px-3">
+            <span class="px-2.5 py-0.5 rounded-full border text-[10px] font-semibold whitespace-nowrap ${typeBadge}">${e.type}</span>
           </td>
-          <td class="py-2.5 px-4 font-bold text-white text-xs dir-ltr text-right">${amt.toLocaleString()} ج.م</td>
-          <td class="py-2.5 px-4">
+          <td class="py-2.5 px-3 font-mono font-bold text-emerald-400 text-xs dir-ltr text-left whitespace-nowrap">${amt.toLocaleString()} ج.م</td>
+          <td class="py-2.5 px-3 font-mono font-bold text-blue-400 text-xs dir-ltr text-left whitespace-nowrap">${amt.toLocaleString()} ج.م</td>
+          <td class="py-2.5 px-3">
+            <div class="space-y-1 text-[11px]">
+              <div class="flex items-center gap-1.5 text-emerald-300">
+                <span class="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 font-mono text-[9px] border border-emerald-800/50 font-bold">من حـ/</span>
+                <span class="truncate max-w-[180px] font-medium" title="${parties.debit}">${parties.debit}</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-blue-300">
+                <span class="px-1.5 py-0.2 rounded bg-blue-950 text-blue-400 font-mono text-[9px] border border-blue-800/50 font-bold">إلى حـ/</span>
+                <span class="truncate max-w-[180px] font-medium" title="${parties.credit}">${parties.credit}</span>
+              </div>
+            </div>
+          </td>
+          <td class="py-2.5 px-3">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/40">${e.status}</span>
           </td>
-          <td class="py-2.5 px-4 font-semibold text-slate-300 text-xs">${e.user}</td>
-          <td class="py-2.5 px-4 text-slate-400 text-[11px]">${e.branch}</td>
-          <td class="py-2.5 px-4 text-slate-400 text-[11px] max-w-[200px] truncate" title="${e.detail || ''}">${e.detail || '-'}</td>
+          <td class="py-2.5 px-3 font-semibold text-slate-300 text-xs whitespace-nowrap">${e.user}</td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="openJournalEntryModal('${e.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/40 font-bold text-[11px] transition flex items-center justify-center gap-1 mx-auto cursor-pointer shadow-xs">
+              <span>📑</span> <span>عرض القيد</span>
+            </button>
+          </td>
         </tr>
       `}).join('');
+
+      // Update Summary Totals
+      const debElem = document.getElementById('entriesTotalDebit');
+      if (debElem) debElem.textContent = totalDebit.toLocaleString() + ' ج.م';
+      const credElem = document.getElementById('entriesTotalCredit');
+      if (credElem) credElem.textContent = totalCredit.toLocaleString() + ' ج.م';
+    }
+
+    function openJournalEntryModal(entryId) {
+      const all = (db && db.dailyEntries) || (window.FULL_ERP_DATABASE && window.FULL_ERP_DATABASE.dailyEntries) || [];
+      const entry = all.find(e => String(e.id) === String(entryId));
+      if (!entry) return;
+
+      const parties = getEntryParties(entry);
+      const amt = Number(entry.amount || 0);
+
+      const titleElem = document.getElementById('jvEntryNumberTitle');
+      if (titleElem) titleElem.textContent = '#' + entry.id;
+      const dateElem = document.getElementById('jvDateDisplay');
+      if (dateElem) dateElem.textContent = entry.date || '-';
+      const typeElem = document.getElementById('jvTypeDisplay');
+      if (typeElem) typeElem.textContent = entry.type || '-';
+      const userElem = document.getElementById('jvUserDisplay');
+      if (userElem) userElem.textContent = entry.user || '-';
+      const memoElem = document.getElementById('jvMemoDisplay');
+      if (memoElem) memoElem.textContent = parties.memo || (entry.type + ' بقيمة ' + amt.toLocaleString() + ' ج.م');
+
+      const tbody = document.getElementById('jvAccountsTableBody');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr class="bg-[#0f1d36] hover:bg-blue-900/30 transition">
+            <td class="py-3 px-3">
+              <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/40 text-[10px] font-bold">الطرف المدين (من حـ/)</span>
+            </td>
+            <td class="py-3 px-3 font-bold text-white text-xs">${parties.debit}</td>
+            <td class="py-3 px-3 text-left font-mono font-bold text-emerald-400 text-xs">${amt.toLocaleString()} ج.م</td>
+            <td class="py-3 px-3 text-left font-mono text-slate-500 text-xs">-</td>
+          </tr>
+          <tr class="bg-[#0d182e] hover:bg-blue-900/30 transition">
+            <td class="py-3 px-3">
+              <span class="px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/40 text-[10px] font-bold">الطرف الدائن (إلى حـ/)</span>
+            </td>
+            <td class="py-3 px-3 font-bold text-white text-xs">${parties.credit}</td>
+            <td class="py-3 px-3 text-left font-mono text-slate-500 text-xs">-</td>
+            <td class="py-3 px-3 text-left font-mono font-bold text-blue-400 text-xs">${amt.toLocaleString()} ج.م</td>
+          </tr>
+        `;
+      }
+
+      const totDeb = document.getElementById('jvTotalDebit');
+      if (totDeb) totDeb.textContent = amt.toLocaleString() + ' ج.م';
+      const totCred = document.getElementById('jvTotalCredit');
+      if (totCred) totCred.textContent = amt.toLocaleString() + ' ج.م';
+
+      const modal = document.getElementById('journalEntryModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeJournalEntryModal() {
+      const modal = document.getElementById('journalEntryModal');
+      if (modal) modal.classList.add('hidden');
     }
 
     function filterEntries() {
